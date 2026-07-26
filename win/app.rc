@@ -1,0 +1,31 @@
+#include <winver.h>
+
+/* Shell picks the lowest-numbered icon as the file's icon in Explorer. */
+1 ICON "icon.ico"
+
+/* The entire course, one self-contained HTML file, baked into the binary. */
+1 RCDATA "payload.html"
+
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+{
+  BLOCK "StringFileInfo"
+  {
+    BLOCK "040904B0"
+    {
+      VALUE "FileDescription",  "Claude Code Academy — learn Claude Code one slide at a time"
+      VALUE "FileVersion",      "1.0.0.0"
+      VALUE "InternalName",     "ClaudeCodeAcademy"
+      VALUE "OriginalFilename", "Claude Code Academy (Windows).exe"
+      VALUE "ProductName",      "Claude Code Academy"
+      VALUE "ProductVersion",   "1.0.0.0"
+    }
+  }
+  BLOCK "VarFileInfo"
+  {
+    VALUE "Translation", 0x409, 1200
+  }
+}

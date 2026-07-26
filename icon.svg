@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <rect width="256" height="256" rx="52" fill="#131a17"/>
+  <!-- The gold edge is a filled rect behind an inset green one, not a stroke:
+       stroke-on-fill:none is dropped by some SVG rasterisers (the one that
+       bakes this into the Windows .ico among them). -->
+  <rect x="31" y="49" width="194" height="132" rx="19" fill="#e8b23a"/>
+  <rect x="37" y="55" width="182" height="120" rx="13" fill="#0b6e4f"/>
+  <circle cx="88" cy="104" r="15" fill="#e9ebe8"/>
+  <circle cx="168" cy="104" r="15" fill="#e9ebe8"/>
+  <rect x="88" y="140" width="80" height="12" rx="6" fill="#e9ebe8"/>
+  <rect x="118" y="24" width="20" height="30" rx="8" fill="#e8b23a"/>
+  <circle cx="128" cy="20" r="12" fill="#e8b23a"/>
+  <rect x="60" y="198" width="30" height="14" rx="7" fill="#c0392b"/>
+  <rect x="113" y="198" width="30" height="14" rx="7" fill="#e8b23a"/>
+  <rect x="166" y="198" width="30" height="14" rx="7" fill="#2f7d4f"/>
+</svg>

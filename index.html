@@ -1,0 +1,2639 @@
+<title>Claude Code Academy — Coach Your Robot Crew</title>
+
+<style>
+  /* ============ TOKENS ============ */
+  /* Dark is the default, deliberately — not a system-preference variant. The
+     light palette below is still complete and correct; set data-theme="light"
+     on <html> to use it. */
+  :root {
+    --paper:#0f1513; --card:#171f1c; --card-2:#212b26;
+    --ink:#e7ebe8; --ink-soft:#a9b5ae; --ink-faint:#7d8a83; --line:#2c3833;
+    --accent:#4fbf95; --accent-ink:#06231a; --accent-dim:#1c2f28;
+    --score:#e8b23a; --score-bg:#33290f;
+    --lred:#ef7d70; --lyellow:#e0b64a; --lgreen:#6ec98d; --llock:#6f6a61;
+
+    --term-bg:#10161a; --term-bg-2:#171f24; --term-line:#2a353c;
+    --term-ink:#d5e0e2; --term-faint:#7d8f95;
+    --term-cyan:#66c6c0; --term-amber:#e0b64a; --term-green:#7fc98a; --term-red:#e77b6f;
+
+    /* No webfonts on purpose: the Artifact CSP blocks font CDNs, so a linked
+       face would fail silently. These are humanist stacks that resolve to a
+       warm, characterful face on every platform. */
+    --display:"Franklin Gothic Heavy","Arial Black","Arial Bold",Impact,Haettenschweiler,sans-serif;
+    --body:Candara,Optima,"Gill Sans Nova","Gill Sans MT","Trebuchet MS",Cantarell,Ubuntu,"Segoe UI",system-ui,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+    --r:6px;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 26px -14px rgba(0,0,0,.65);
+  }
+  :root[data-theme="light"] {
+    --paper:#e9ebe8; --card:#f4f5f3; --card-2:#dfe3e0;
+    --ink:#131a17; --ink-soft:#4a564f; --ink-faint:#77837b; --line:#c9cfca;
+    --accent:#0b6e4f; --accent-ink:#ffffff; --accent-dim:#d7e5df;
+    --score:#a9741a; --score-bg:#f5e4bd;
+    --lred:#c0392b; --lyellow:#b07d0a; --lgreen:#2f7d4f; --llock:#8b8378;
+    --shadow:0 1px 2px rgba(19,26,23,.09),0 8px 22px -12px rgba(19,26,23,.2);
+  }
+
+  /* ============ OVERALL SIZE ============ */
+  /* One dial for the whole course. This scales text AND spacing together, so
+     nothing gets cramped the way font-only scaling does. Change this single
+     number to resize every page at once. */
+  :root { zoom: 1.1; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--body); font-size:18.7px; line-height:1.64;
+    /* bold print throughout — secondary text is separated by colour, not weight */
+    font-weight:700;
+    -webkit-text-size-adjust:100%;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    text-rendering:optimizeLegibility;
+    padding-bottom:88px;
+  }
+  b, strong { font-weight:900; }
+  h1,h2,h3,.display {
+    font-family:var(--display); text-transform:uppercase;
+    letter-spacing:-.015em; text-wrap:balance; line-height:1.02; margin:0; font-weight:900;
+  }
+  p { margin:0; }
+  :focus-visible { outline:3px solid var(--accent); outline-offset:3px; border-radius:2px; }
+  .eyebrow {
+    font-size:12.1px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink-faint); font-family:var(--body);
+  }
+
+  /* ============ TOP RAIL ============ */
+  .rail { position:sticky; top:0; z-index:20; background:var(--paper); border-bottom:1px solid var(--line); }
+  .rail-bar { height:3px; background:var(--card-2); }
+  .rail-bar i { display:block; height:100%; background:var(--accent); width:0; transition:width .3s ease; }
+  .rail-in {
+    max-width:1000px; margin:0 auto; padding:9px 20px;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .chip {
+    font-family:var(--mono); font-size:12.1px; font-weight:700; letter-spacing:.09em;
+    text-transform:uppercase; background:var(--accent-dim); color:var(--accent);
+    padding:4px 9px; border-radius:3px;
+  }
+  .rail-in .count {
+    margin-left:auto; font-family:var(--mono); font-size:13.2px; color:var(--ink-faint);
+    font-variant-numeric:tabular-nums;
+  }
+  .rail-in .badges { font-family:var(--mono); font-size:13.2px; color:var(--score); font-weight:700; }
+
+  /* ============ SLIDE ============ */
+  .stage { max-width:1000px; margin:0 auto; padding:38px 20px 20px; }
+  @media (max-width:700px) { .stage { padding-top:24px; } }
+  .slide > * + * { margin-top:22px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .slide { animation:in .3s ease both; }
+    @keyframes in { from { opacity:0; transform:translateY(9px); } to { opacity:1; transform:none; } }
+  }
+
+  .slide h2 { font-size:clamp(33px,6.6vw,59.4px); }
+  .slide h3 { font-size:clamp(24.2px,4.4vw,37.4px); }
+  .lede { font-size:clamp(19.8px,2.64vw,24.2px); color:var(--ink-soft); max-width:60ch; }
+  .body-txt { font-size:19.8px; max-width:62ch; color:var(--ink); }
+  .body-txt + .body-txt { margin-top:12px; }
+  .small { font-size:16.5px; color:var(--ink-faint); max-width:62ch; }
+
+  /* cover slide */
+  .cover { text-align:center; padding:20px 0 10px; }
+  .cover h2 { font-size:clamp(41.8px,9.9vw,88px); }
+  .cover h2 .em { color:var(--score); }
+  .cover .lede { margin-left:auto; margin-right:auto; }
+  .robot {
+    font-size:clamp(61.6px,15.4vw,121px); line-height:1;
+    filter:grayscale(.15);
+  }
+
+  /* level opener */
+  .opener { border-left:5px solid var(--accent); padding:6px 0 6px 22px; }
+  .opener .num {
+    font-family:var(--display); font-size:clamp(52.8px,13.2vw,105.6px); color:var(--accent-dim);
+    line-height:.85; letter-spacing:-.04em;
+  }
+
+  /* generic card */
+  .card {
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+    padding:20px 22px; box-shadow:var(--shadow);
+  }
+  .card > * + * { margin-top:12px; }
+
+  .note {
+    border-left:4px solid var(--score); background:var(--score-bg);
+    border-radius:var(--r); padding:15px 18px;
+  }
+  .note .eyebrow { color:var(--score); display:block; margin-bottom:6px; }
+  .note p { font-size:17.6px; }
+
+  .alarm {
+    border-left:4px solid var(--lred); background:var(--card);
+    border:1px solid var(--line); border-left:4px solid var(--lred);
+    border-radius:var(--r); padding:15px 18px;
+  }
+  .alarm .eyebrow { color:var(--lred); display:block; margin-bottom:6px; }
+  .alarm p + p { margin-top:9px; }
+
+  .grownup {
+    border:2px dashed var(--line); border-radius:var(--r); padding:18px 20px; background:none;
+  }
+  .grownup .eyebrow { color:var(--ink-soft); display:block; margin-bottom:10px; }
+  .grownup ul { margin:0; padding-left:20px; display:grid; gap:9px; }
+  .grownup li { font-size:17.6px; }
+
+  .word {
+    display:inline-block; font-family:var(--mono); font-size:13.2px;
+    background:var(--card-2); color:var(--ink-soft); border-radius:3px;
+    padding:2px 7px; white-space:nowrap;
+  }
+
+  code.ic {
+    font-family:var(--mono); font-size:.92em; background:var(--card-2);
+    padding:2px 6px; border-radius:3px;
+  }
+  kbd {
+    font-family:var(--mono); font-size:.86em; background:var(--card-2);
+    border:1px solid var(--line); border-bottom-width:2px;
+    border-radius:4px; padding:2px 7px; white-space:nowrap;
+  }
+
+  /* ============ DRAWN VISUALS ============ */
+  .vis { display:grid; gap:14px; }
+
+  /* mock terminal */
+  .mock {
+    background:var(--term-bg); border:1px solid var(--term-line); border-radius:var(--r);
+    overflow:hidden; font-family:var(--mono); font-size:15.4px; color:var(--term-ink);
+    box-shadow:var(--shadow);
+  }
+  .mock-bar {
+    display:flex; align-items:center; gap:6px; padding:8px 11px;
+    background:var(--term-bg-2); border-bottom:1px solid var(--term-line);
+  }
+  .mock-bar i { width:10px; height:10px; border-radius:50%; background:#3c4a52; flex:none; }
+  .mock-bar span { font-size:12.1px; color:var(--term-faint); margin-left:6px; }
+  .mock-body { padding:14px; display:grid; gap:5px; overflow-x:auto; }
+  .mock-body .l { white-space:pre; }
+  .mock .cy { color:var(--term-cyan); }
+  .mock .gr { color:var(--term-green); }
+  .mock .am { color:var(--term-amber); }
+  .mock .fa { color:var(--term-faint); }
+  .mock .rd { color:var(--term-red); }
+  .mock-strip {
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding:9px 13px; border-top:1px solid var(--term-line); background:var(--term-bg-2);
+    font-size:13.2px; color:var(--term-faint);
+  }
+  .mock-strip b { color:var(--term-ink); font-weight:400; }
+
+  /* callouts under a mock */
+  .callouts { display:grid; gap:9px; }
+  .co {
+    display:grid; grid-template-columns:26px 1fr; gap:11px; align-items:start;
+    font-size:17.6px;
+  }
+  .co .n {
+    width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--accent-ink);
+    font-family:var(--mono); font-size:13.2px; font-weight:700; display:grid; place-items:center;
+    flex:none; margin-top:2px;
+  }
+  .co b { font-weight:700; }
+  .co span { color:var(--ink-soft); }
+  .pin {
+    display:inline-grid; place-items:center; width:19px; height:19px; border-radius:50%;
+    background:var(--accent); color:var(--accent-ink);
+    font-family:var(--mono); font-size:12.1px; font-weight:700; vertical-align:middle;
+  }
+
+  /* flow diagram */
+  .flow { display:flex; align-items:stretch; gap:0; flex-wrap:wrap; }
+  .fstep {
+    flex:1 1 150px; background:var(--card); border:1px solid var(--line);
+    border-radius:var(--r); padding:15px; text-align:center;
+  }
+  .fstep .ico { font-size:35.2px; line-height:1; }
+  .fstep b { display:block; margin-top:9px; font-size:17.6px; }
+  .fstep span { font-size:15.4px; color:var(--ink-soft); }
+  .farrow {
+    flex:0 0 34px; display:grid; place-items:center;
+    font-family:var(--mono); color:var(--ink-faint); font-size:22px;
+  }
+  @media (max-width:640px) {
+    .farrow { flex-basis:100%; height:26px; transform:rotate(90deg); }
+  }
+
+  /* traffic lights */
+  .lights { display:grid; gap:11px; }
+  .lt {
+    display:grid; grid-template-columns:auto 1fr; gap:15px; align-items:start;
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:16px 18px;
+  }
+  .lt .orb {
+    width:34px; height:34px; border-radius:50%; flex:none;
+    display:grid; place-items:center; font-size:16.5px; color:#fff; font-weight:700;
+  }
+  .lt.red .orb { background:var(--lred); }
+  .lt.yellow .orb { background:var(--lyellow); }
+  .lt.green .orb { background:var(--lgreen); }
+  .lt.lock .orb { background:var(--llock); }
+  .lt.lock { border-style:dashed; }
+  .lt .tag { font-size:12.1px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+  .lt.red .tag { color:var(--lred); }
+  .lt.yellow .tag { color:var(--lyellow); }
+  .lt.green .tag { color:var(--lgreen); }
+  .lt.lock .tag { color:var(--llock); }
+  .lt b { display:block; font-size:20.9px; margin-top:3px; }
+  .lt span { font-size:17.6px; color:var(--ink-soft); }
+
+  /* backpack meters */
+  .packs { display:grid; gap:12px; }
+  .pack { display:grid; grid-template-columns:1fr; gap:7px; }
+  .pack .top { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .pack .top b { font-size:17.6px; }
+  .pack .top span { font-family:var(--mono); font-size:14.3px; color:var(--ink-faint); font-variant-numeric:tabular-nums; }
+  .meter { height:16px; background:var(--card-2); border-radius:8px; overflow:hidden; }
+  .meter i { display:block; height:100%; border-radius:8px; }
+  .meter.ok i { background:var(--lgreen); }
+  .meter.mid i { background:var(--lyellow); }
+  .meter.bad i { background:var(--lred); }
+  .pack .cap { font-size:16.5px; color:var(--ink-soft); }
+
+  /* keycaps row */
+  .keys { display:grid; gap:11px; }
+  .keyrow {
+    display:grid; grid-template-columns:auto 1fr; gap:15px; align-items:center;
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:14px 17px;
+  }
+  .keyrow .cap {
+    font-family:var(--mono); font-size:22px; font-weight:700;
+    background:var(--paper); border:1px solid var(--line); border-bottom-width:3px;
+    border-radius:6px; padding:8px 14px; min-width:52px; text-align:center; color:var(--ink);
+  }
+  .keyrow b { display:block; font-size:18.7px; }
+  .keyrow span { font-size:16.5px; color:var(--ink-soft); }
+
+  /* copy command */
+  .cmd { display:flex; background:var(--term-bg); border:1px solid var(--term-line); border-radius:var(--r); overflow:hidden; }
+  .cmd code { font-family:var(--mono); font-size:15.4px; color:var(--term-ink); padding:13px 15px; overflow-x:auto; white-space:pre; flex:1; }
+  .cmd button {
+    font:inherit; font-size:12.1px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    background:var(--term-bg-2); color:var(--term-cyan); border:0; border-left:1px solid var(--term-line);
+    padding:0 15px; cursor:pointer; min-width:82px;
+  }
+  .cmd button:hover { background:var(--accent); color:var(--accent-ink); }
+  .cmd-label { display:block; margin-bottom:6px; }
+
+  /* ============ DUGOUT ============ */
+  .dugout { background:var(--term-bg); border:1px solid var(--term-line); border-radius:var(--r); overflow:hidden; box-shadow:var(--shadow); }
+  .dug-top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:9px 13px; background:var(--term-bg-2); border-bottom:1px solid var(--term-line); }
+  .dug-top .lbl { font-family:var(--mono); font-size:12.1px; letter-spacing:.1em; text-transform:uppercase; color:var(--term-amber); font-weight:700; }
+  .dug-top .fake { font-size:12.1px; color:var(--term-faint); }
+  .backpack { display:flex; align-items:center; gap:8px; margin-left:auto; }
+  .backpack .bl { font-size:12.1px; color:var(--term-faint); font-family:var(--mono); }
+  .bar { width:80px; height:7px; background:#263137; border-radius:4px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--term-green); width:6%; transition:width .35s ease; }
+  .bar.warn i { background:var(--term-amber); }
+  .bar.hot i { background:var(--term-red); }
+  .backpack .pct { font-family:var(--mono); font-size:12.1px; color:var(--term-ink); font-variant-numeric:tabular-nums; min-width:32px; text-align:right; }
+  .goal { padding:11px 13px; background:#1b2a22; border-bottom:1px solid var(--term-line); font-size:15.4px; color:#cfe6d7; display:flex; gap:10px; }
+  .goal .g { font-family:var(--mono); font-size:12.1px; letter-spacing:.1em; text-transform:uppercase; color:var(--term-green); font-weight:700; flex:none; padding-top:3px; }
+  .goal .hint { display:block; margin-top:7px; color:var(--term-amber); font-size:14.3px; }
+  .screen { font-family:var(--mono); font-size:14.85px; line-height:1.55; color:var(--term-ink); padding:13px; height:250px; overflow-y:auto; white-space:pre-wrap; word-break:break-word; }
+  .screen .u { color:var(--term-cyan); }
+  .screen .sys { color:var(--term-faint); }
+  .screen .ok { color:var(--term-green); }
+  .screen .warn { color:var(--term-amber); }
+  .screen .err { color:var(--term-red); }
+  .screen .ln { margin:0; }
+  .screen .blk { margin:6px 0; }
+  .dug-input { display:flex; align-items:center; gap:9px; padding:10px 13px; border-top:1px solid var(--term-line); background:var(--term-bg-2); }
+  .dug-input .caret { font-family:var(--mono); color:var(--term-green); font-weight:700; flex:none; }
+  .dug-input input { flex:1; background:none; border:0; color:var(--term-ink); font-family:var(--mono); font-size:15.4px; padding:6px 0; min-height:32px; }
+  .dug-input input::placeholder { color:#5c6b71; }
+  .dug-input input:focus { outline:none; }
+  .dug-input:focus-within { box-shadow:inset 0 0 0 2px var(--accent); }
+  .dug-foot { display:flex; gap:14px; flex-wrap:wrap; align-items:center; padding:8px 13px; border-top:1px solid var(--term-line); }
+  .mode-chip { display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:12.65px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+  .mode-chip .orb { width:10px; height:10px; border-radius:50%; flex:none; }
+  .mode-chip.red { color:#ef7d70; } .mode-chip.red .orb { background:#ef7d70; }
+  .mode-chip.yellow { color:#e0b64a; } .mode-chip.yellow .orb { background:#e0b64a; }
+  .mode-chip.green { color:#6ec98d; } .mode-chip.green .orb { background:#6ec98d; }
+  .keyhint { font-family:var(--mono); font-size:12.65px; color:var(--term-faint); }
+  .keyhint kbd { font-family:var(--mono); background:#263137; border:0; border-radius:3px; padding:1px 5px; color:var(--term-ink); font-size:12.1px; }
+
+  /* stamp */
+  .stamp {
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:var(--display); text-transform:uppercase; font-size:18.7px; letter-spacing:.03em;
+    color:var(--accent); background:var(--accent-dim); border-radius:var(--r); padding:12px 18px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .stamp.pop { animation:pop .45s cubic-bezier(.2,1.5,.4,1) both; }
+    @keyframes pop { from { transform:scale(.6) rotate(-6deg); opacity:0; } to { transform:none; opacity:1; } }
+  }
+  .badge-list { display:flex; gap:9px; flex-wrap:wrap; }
+  .bpill {
+    font-size:15.4px; font-weight:600; background:var(--card); border:1px solid var(--line);
+    border-radius:99px; padding:7px 14px; color:var(--ink-soft);
+  }
+  .bpill.got { background:var(--accent-dim); color:var(--accent); border-color:transparent; }
+
+  /* ============ BOTTOM NAV ============ */
+  .nav {
+    position:fixed; bottom:0; left:0; right:0; z-index:30;
+    background:var(--paper); border-top:1px solid var(--line);
+  }
+  .nav-in {
+    max-width:1000px; margin:0 auto; padding:12px 20px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .btn {
+    font:inherit; font-size:17.6px; font-weight:700; border:0; border-radius:var(--r);
+    padding:13px 24px; cursor:pointer; min-height:48px;
+    background:var(--accent); color:var(--accent-ink);
+  }
+  .btn:hover { filter:brightness(1.08); }
+  .btn.sec { background:var(--card); color:var(--ink-soft); border:1px solid var(--line); }
+  .btn.sec:hover { filter:none; border-color:var(--accent); color:var(--accent); }
+  .btn[disabled] { opacity:.4; cursor:not-allowed; filter:none; }
+  .nav-in .spacer { flex:1; }
+  .nav-in .next { margin-left:auto; }
+  .dots { display:flex; gap:4px; flex-wrap:nowrap; overflow:hidden; }
+  .dot { width:7px; height:7px; border-radius:50%; background:var(--card-2); flex:none; }
+  .dot.on { background:var(--accent); }
+  .dot.seen { background:var(--ink-faint); }
+  @media (max-width:640px) { .dots { display:none; } }
+
+  .reset {
+    font:inherit; font-size:14.3px; background:none; border:0; color:var(--ink-faint);
+    text-decoration:underline; cursor:pointer; padding:10px 6px; min-height:44px;
+  }
+
+  /* ============ LEVEL TABS ============ */
+  .tabs {
+    max-width:1000px; margin:0 auto; padding:0 20px 9px;
+    display:flex; align-items:center; gap:4px; overflow-x:auto;
+    scrollbar-width:thin;
+  }
+  .tabs::-webkit-scrollbar { height:5px; }
+  .tabs::-webkit-scrollbar-thumb { background:var(--line); border-radius:3px; }
+  .tab {
+    flex:none; min-width:36px; height:36px; padding:0 7px;
+    font:inherit; font-family:var(--mono); font-size:13.75px; font-weight:700;
+    background:var(--card); border:1px solid var(--line); border-radius:5px;
+    color:var(--ink-soft); cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center; gap:3px;
+  }
+  .tab:hover { border-color:var(--accent); color:var(--accent); }
+  .tab.on { background:var(--accent); color:var(--accent-ink); border-color:transparent; }
+  .tab.got:not(.on) { border-color:var(--accent); color:var(--accent); }
+  .tab .st { font-size:9.9px; line-height:1; }
+  .tab.rc { font-family:var(--body); font-size:12.1px; letter-spacing:.06em; text-transform:uppercase; }
+
+  /* ============ MISSION ============ */
+  .done-box {
+    border-left:4px solid var(--lgreen); background:var(--card);
+    border:1px solid var(--line); border-left:4px solid var(--lgreen);
+    border-radius:var(--r); padding:15px 18px;
+  }
+  .done-box .eyebrow { color:var(--lgreen); display:block; margin-bottom:6px; }
+  .done-box p { font-size:17.6px; }
+  .mission-tag {
+    display:inline-block; font-size:12.1px; font-weight:700; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--score); background:var(--score-bg);
+    padding:5px 11px; border-radius:99px;
+  }
+  .sr { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  /* ============ MENU ============ */
+  .menu-btn {
+    font:inherit; font-size:14.3px; font-weight:700; letter-spacing:.04em;
+    background:var(--card); border:1px solid var(--line); color:var(--ink);
+    border-radius:var(--r); padding:7px 13px; cursor:pointer; min-height:38px;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .menu-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .menu-btn .bars { display:grid; gap:3px; }
+  .menu-btn .bars i { display:block; width:14px; height:2px; background:currentColor; }
+
+  .scrim {
+    position:fixed; inset:0; z-index:40; background:rgba(9,14,12,.55);
+    display:none; padding:0;
+  }
+  .scrim.open { display:block; }
+  @media (prefers-reduced-motion: no-preference) {
+    .scrim.open { animation:fade .18s ease both; }
+    @keyframes fade { from { opacity:0; } to { opacity:1; } }
+  }
+  .sheet {
+    position:absolute; top:0; bottom:0; left:0; width:min(430px,90vw);
+    background:var(--paper); border-right:1px solid var(--line);
+    overflow-y:auto; padding:18px 18px 40px;
+    box-shadow:0 0 60px rgba(0,0,0,.35);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .scrim.open .sheet { animation:slidein .22s cubic-bezier(.2,.8,.3,1) both; }
+    @keyframes slidein { from { transform:translateX(-14px); opacity:.6; } to { transform:none; opacity:1; } }
+  }
+  .sheet-head { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .sheet-head h2 { font-size:22px; }
+  .sheet-head .x {
+    margin-left:auto; font:inherit; font-size:24.2px; line-height:1;
+    background:none; border:1px solid var(--line); border-radius:var(--r);
+    width:40px; height:40px; cursor:pointer; color:var(--ink-soft);
+  }
+  .sheet-head .x:hover { border-color:var(--accent); color:var(--accent); }
+
+  .sec { border-top:1px solid var(--line); }
+  .sec:first-of-type { border-top:0; }
+  .sec-btn {
+    display:flex; align-items:center; gap:11px; width:100%;
+    font:inherit; text-align:left; background:none; border:0; cursor:pointer;
+    padding:13px 6px; min-height:52px; color:var(--ink);
+  }
+  .sec-btn:hover { background:var(--card); }
+  .sec-btn .mark {
+    width:26px; height:26px; border-radius:50%; flex:none; display:grid; place-items:center;
+    font-family:var(--mono); font-size:12.1px; font-weight:700;
+    background:var(--card-2); color:var(--ink-faint);
+  }
+  .sec-btn .mark.got { background:var(--accent); color:var(--accent-ink); }
+  .sec-btn .mark.here { box-shadow:0 0 0 3px var(--accent-dim); }
+  .sec-btn .nm { flex:1; font-size:17.6px; font-weight:700; line-height:1.25; }
+  .sec-btn .ct { font-family:var(--mono); font-size:12.1px; color:var(--ink-faint); flex:none; }
+  .sec.on .sec-btn .nm { color:var(--accent); }
+
+  .subs { list-style:none; margin:0 0 10px; padding:0 0 0 37px; display:grid; gap:1px; }
+  .subs li { margin:0; }
+  .sub-btn {
+    display:flex; gap:9px; align-items:baseline; width:100%;
+    font:inherit; font-size:15.4px; text-align:left; background:none; border:0;
+    color:var(--ink-soft); cursor:pointer; padding:8px 6px; min-height:38px; border-radius:4px;
+  }
+  .sub-btn:hover { background:var(--card); color:var(--ink); }
+  .sub-btn.on { background:var(--accent-dim); color:var(--accent); font-weight:700; }
+  .sub-btn .sn { font-family:var(--mono); font-size:12.1px; color:var(--ink-faint); flex:none; min-width:22px; }
+  .sub-btn.on .sn { color:var(--accent); }
+  .sub-btn .tk { flex:none; font-size:12.1px; }
+
+  .sheet-foot { border-top:1px solid var(--line); margin-top:14px; padding-top:14px; }
+
+  /* ============ COMPARE / RECIPE ============ */
+  .cmp { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:640px) { .cmp { grid-template-columns:1fr; } }
+  .cmp .col {
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+    padding:15px 17px;
+  }
+  .cmp .col.bad { border-left:4px solid var(--lred); }
+  .cmp .col.good { border-left:4px solid var(--lgreen); }
+  .cmp .lab { font-size:12.1px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:8px; }
+  .cmp .bad .lab { color:var(--lred); }
+  .cmp .good .lab { color:var(--lgreen); }
+  .cmp .say { font-family:var(--mono); font-size:15.4px; line-height:1.5; color:var(--ink); }
+  .cmp .why { font-size:15.4px; color:var(--ink-soft); margin-top:10px; }
+
+  .recipe { display:grid; gap:11px; }
+  .ing {
+    display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start;
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:15px 17px;
+  }
+  .ing .k {
+    font-family:var(--display); font-size:28.6px; line-height:1; color:var(--accent);
+    min-width:30px;
+  }
+  .ing b { display:block; font-size:18.7px; }
+  .ing span { font-size:16.5px; color:var(--ink-soft); }
+  .ing code { font-family:var(--mono); font-size:14.85px; background:var(--card-2); padding:2px 6px; border-radius:3px; display:inline-block; margin-top:7px; }
+
+  .tree { display:grid; gap:7px; font-family:var(--mono); font-size:15.4px; }
+  .tree .row {
+    display:flex; gap:10px; align-items:baseline;
+    background:var(--card); border:1px solid var(--line); border-radius:4px; padding:10px 13px;
+  }
+  .tree .row .d { color:var(--ink-faint); flex:none; }
+  .tree .row b { color:var(--ink); font-weight:700; }
+  .tree .row span { font-family:var(--body); font-size:14.85px; color:var(--ink-soft); margin-left:auto; text-align:right; }
+  .tree .row.top { border-left:3px solid var(--accent); }
+</style>
+
+<h1 class="sr">Claude Code Academy — coach your robot crew</h1>
+
+<div class="rail">
+  <div class="rail-bar"><i id="railFill"></i></div>
+  <div class="rail-in">
+    <button class="menu-btn" id="menuBtn" type="button" aria-haspopup="dialog">
+      <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span> Sections
+    </button>
+    <span class="chip" id="chipLevel">Welcome</span>
+    <span class="badges" id="chipBadges"></span>
+    <span class="count" id="chipCount">1 / 1</span>
+  </div>
+  <div class="tabs" id="tabs" aria-label="Jump to a level"></div>
+</div>
+
+<div class="scrim" id="scrim">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Course sections" id="sheet">
+    <div class="sheet-head">
+      <h2 class="display">Sections</h2>
+      <button class="x" id="closeMenu" type="button" aria-label="Close menu">×</button>
+    </div>
+    <div id="secList"></div>
+    <div class="sheet-foot">
+      <button class="reset" id="resetBtn" type="button">Reset all my progress</button>
+    </div>
+  </div>
+</div>
+
+<div class="stage"><div class="slide" id="slide"></div></div>
+
+<div class="nav">
+  <div class="nav-in">
+    <button class="btn sec" id="backBtn" type="button">← Back</button>
+    <div class="dots" id="dots"></div>
+    <button class="btn next" id="nextBtn" type="button">Next →</button>
+  </div>
+</div>
+
+<p class="sr" id="live" role="status" aria-live="polite"></p>
+
+<script>
+/* ==========================================================
+   Claude Code Academy — slide deck.
+   14 levels in 4 acts, each act closing with a recap mission.
+   The practice terminal is a drawing. Nothing executes:
+   no filesystem, no network, no eval.
+   ========================================================== */
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const say = m => { document.getElementById("live").textContent = m; };
+
+/* a copyable command box */
+function cmdEl(label, cmd) {
+  const w = el("div");
+  if (label) w.append(el("span","eyebrow cmd-label",label));
+  const c = el("div","cmd",`<code>${esc(cmd)}</code>`);
+  const b = el("button",null,"Copy"); b.type = "button";
+  b.onclick = async () => {
+    try { await navigator.clipboard.writeText(cmd); b.textContent = "Copied"; }
+    catch (e) { b.textContent = "Select it"; }
+    setTimeout(() => { b.textContent = "Copy"; }, 1600);
+  };
+  c.append(b); w.append(c);
+  return w;
+}
+
+/* ---------- drawn visuals ---------- */
+const VIS = {
+
+  robot: () => `<div class="robot" aria-hidden="true">🤖</div>`,
+
+  /* a plain terminal with a typed instruction */
+  termHello: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>Terminal</span></div>
+      <div class="mock-body">
+        <p class="l fa">$ claude</p>
+        <p class="l">&nbsp;</p>
+        <p class="l cy">&gt; make me a website about my dog</p>
+        <p class="l">&nbsp;</p>
+        <p class="l fa">Sure. I'll create index.html with a photo</p>
+        <p class="l fa">spot and a short bio…</p>
+        <p class="l gr">✓ created index.html</p>
+      </div>
+    </div>`,
+
+  /* coach loop */
+  coachLoop: () => `
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">🧑</div><b>You</b><span>Decide what the job is. Say it clearly.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🤖</div><b>The robot</b><span>Goes and does the work.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🔍</div><b>You again</b><span>Check it. Did it actually work?</span></div>
+    </div>`,
+
+  installFlow: () => `
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">📋</div><b>1. Paste one line</b><span>Installs the robot on your computer.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">⌨️</div><b>2. Type <code class="ic">claude</code></b><span>Wakes it up.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🔑</div><b>3. Type <code class="ic">/login</code></b><span>Tells it who you are.</span></div>
+    </div>`,
+
+  trustPrompt: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>Terminal — first time in a folder</span></div>
+      <div class="mock-body">
+        <p class="l am">Do you trust the files in this folder?</p>
+        <p class="l">&nbsp;</p>
+        <p class="l fa">  /home/you/my-first-project</p>
+        <p class="l">&nbsp;</p>
+        <p class="l gr">❯ 1. Yes, I trust this folder</p>
+        <p class="l fa">  2. No, take me out of here</p>
+      </div>
+    </div>`,
+
+  /* annotated status strip — the L2 centrepiece */
+  statusStrip: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>Claude Code</span></div>
+      <div class="mock-body">
+        <p class="l cy">&gt; add a scoreboard to my game</p>
+        <p class="l fa">Reading game.js…</p>
+        <p class="l gr">✓ added scoreboard</p>
+      </div>
+      <div class="mock-strip">
+        <span><span class="pin">1</span> <b>sonnet</b></span>
+        <span><span class="pin">2</span> <b>~/my-game</b></span>
+        <span><span class="pin">3</span> <b>accept edits</b></span>
+        <span><span class="pin">4</span> <b>34%</b></span>
+      </div>
+    </div>
+    <div class="callouts">
+      <div class="co"><span class="n">1</span><span><b>Which brain it is using.</b> <span>That word is just the name of one of the brains. Big and careful, or small and quick. Level 10.</span></span></div>
+      <div class="co"><span class="n">2</span><span><b>Which folder it is standing in.</b> <span>It can only touch things in here. Check this first, every time.</span></span></div>
+      <div class="co"><span class="n">3</span><span><b>Which traffic light is on.</b> <span>How much it is allowed to do without asking. That is the whole of Level 3.</span></span></div>
+      <div class="co"><span class="n">4</span><span><b>How full its backpack is.</b> <span>Next slide.</span></span></div>
+    </div>`,
+
+  packs: () => `
+    <div class="packs">
+      <div class="pack">
+        <div class="top"><b>Fresh and sharp</b><span>0–50%</span></div>
+        <div class="meter ok"><i style="width:34%"></i></div>
+        <div class="cap">Best work happens here. Experienced coaches try to stay in this band the whole time.</div>
+      </div>
+      <div class="pack">
+        <div class="top"><b>Getting heavy</b><span>50–75%</span></div>
+        <div class="meter mid"><i style="width:66%"></i></div>
+        <div class="cap">Still fine, but tidy up soon — squash the chat with <code class="ic">/compact</code> or start a fresh one.</div>
+      </div>
+      <div class="pack">
+        <div class="top"><b>Too full</b><span>75%+</span></div>
+        <div class="meter bad"><i style="width:88%"></i></div>
+        <div class="cap">It starts forgetting the beginning and cutting corners to finish. Start a new conversation instead of pushing on.</div>
+      </div>
+    </div>`,
+
+  slashMenu: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>you typed one slash</span></div>
+      <div class="mock-body">
+        <p class="l cy">&gt; /</p>
+        <p class="l">&nbsp;</p>
+        <p class="l gr">❯ /help      what can I do?</p>
+        <p class="l fa">  /context   how full is the backpack?</p>
+        <p class="l fa">  /compact   squash the chat smaller</p>
+        <p class="l fa">  /model     pick a brain</p>
+        <p class="l fa">  /init      write yourself a notebook</p>
+        <p class="l fa">  /agents    my teammates</p>
+        <p class="l fa">  /clear     start over</p>
+      </div>
+    </div>`,
+
+  prefixKeys: () => `
+    <div class="keys">
+      <div class="keyrow"><span class="cap">/</span><span><b>A command for the robot's app.</b><span>Type one slash and a menu appears. You never have to memorize anything.</span></span></div>
+      <div class="keyrow"><span class="cap">@</span><span><b>Point at a file.</b><span><code class="ic">@game.js</code> means "look at this exact file", so it doesn't go hunting.</span></span></div>
+      <div class="keyrow"><span class="cap">!</span><span><b>Skip the robot.</b><span>Talk straight to the computer instead. <code class="ic">!ls</code> just lists your files.</span></span></div>
+    </div>`,
+
+  shiftTab: () => `
+    <div class="keys">
+      <div class="keyrow">
+        <span class="cap" style="min-width:auto">Shift + Tab</span>
+        <span><b>One combination, pressed over and over.</b><span>Each press moves the light along one step, then loops back to the start.</span></span>
+      </div>
+    </div>
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">🔴</div><b>Ask first</b><span>press</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🟡</div><b>Accept edits</b><span>press</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🟢</div><b>Plan only</b><span>press</span></div>
+      <div class="farrow" aria-hidden="true">↺</div>
+    </div>`,
+
+  lightRed: () => `
+    <div class="lights"><div class="lt red">
+      <span class="orb" aria-hidden="true">1</span>
+      <span><span class="tag">Light 1 · Red</span><b>Ask first</b>
+      <span>Before it changes a single file, it stops and asks you. Slower. Sometimes annoying. This is where every beginner should live for their first week.</span></span>
+    </div></div>
+    <div class="mock">
+      <div class="mock-body">
+        <p class="l fa">To do that I need to create <span class="am">hello.txt</span>.</p>
+        <p class="l am">May I? [y / n]</p>
+      </div>
+    </div>`,
+
+  lightYellow: () => `
+    <div class="lights"><div class="lt yellow">
+      <span class="orb" aria-hidden="true">2</span>
+      <span><span class="tag">Light 2 · Yellow</span><b>Accept edits</b>
+      <span>It changes files it already knows about without stopping. It still asks before creating something brand new. Once you trust it in a folder you made yourself, this is the normal place to be.</span></span>
+    </div></div>`,
+
+  lightGreen: () => `
+    <div class="lights"><div class="lt green">
+      <span class="orb" aria-hidden="true">3</span>
+      <span><span class="tag">Light 3 · Green</span><b>Plan only</b>
+      <span>It reads and thinks and explains, but changes nothing at all. Perfect for "what would you do?" when you are not ready to commit.</span></span>
+    </div></div>`,
+
+  lightLocked: () => `
+    <div class="lights"><div class="lt lock">
+      <span class="orb" aria-hidden="true">🔒</span>
+      <span><span class="tag">Light 4 · Locked in this course</span><b>No asking at all</b>
+      <span>Every question turned off. It does whatever it decides, instantly.</span></span>
+    </div></div>`,
+
+  sandboxIdea: () => `
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">📦</div><b>A sandbox</b><span>The robot can only play inside one box. It cannot reach the rest of the computer.</span></div>
+      <div class="farrow" aria-hidden="true">+</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">📝</div><b>An allowed list</b><span>A short list of websites it may visit. Everything else is blocked.</span></div>
+    </div>`,
+
+  /* ---- Level 4 ---- */
+  vagueVsPrecise: () => `
+    <div class="cmp">
+      <div class="col bad"><span class="lab">Too vague</span>
+        <p class="say">make my game better</p>
+        <p class="why">"Better" means nothing. It will guess — and guess something you didn't want.</p></div>
+      <div class="col good"><span class="lab">Clear enough to do</span>
+        <p class="say">in @game.js, make the ball speed up a little bit every time it bounces</p>
+        <p class="why">One file. One change. You'll know instantly whether it worked.</p></div>
+    </div>`,
+
+  bigVsSmall: () => `
+    <div class="cmp">
+      <div class="col bad"><span class="lab">One giant ask</span>
+        <p class="say">build me a game with levels and sound and a high score table and a menu screen</p>
+        <p class="why">Four jobs at once. If one goes wrong you won't know which — or how to describe the problem.</p></div>
+      <div class="col good"><span class="lab">Four small asks, in order</span>
+        <p class="say">1. make a ball that bounces<br>2. now add a paddle I can move<br>3. now count points<br>4. now add a sound on each bounce</p>
+        <p class="why">You check after each one. Something breaks, you know exactly what caused it.</p></div>
+    </div>`,
+
+  itsWords: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>reading what it says back</span></div>
+      <div class="mock-body">
+        <p class="l cy">&gt; make the top thing bigger</p>
+        <p class="l fa">I'll increase the font size of the</p>
+        <p class="l fa">&lt;strong&gt;page heading&lt;/strong&gt; in styles.css…</p>
+        <p class="l">&nbsp;</p>
+        <p class="l am">↑ it calls it the "page heading"</p>
+        <p class="l">&nbsp;</p>
+        <p class="l cy">&gt; make the page heading bigger</p>
+        <p class="l gr">✓ found it first try</p>
+      </div>
+    </div>`,
+
+  /* ---- Level 5 ---- */
+  planFlow: () => `
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">🟢</div><b>Green light</b><span>It reads and thinks. Touches nothing.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">❓</div><b>It asks you things</b><span>Answer the questions. Ask for more of them.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">📋</div><b>You read the plan</b><span>Cheap to fix here. Expensive to fix later.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🔨</div><b>Then it builds</b><span>Now it knows what you meant.</span></div>
+    </div>`,
+
+  rewind: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>it went the wrong way</span></div>
+      <div class="mock-body">
+        <p class="l gr">✓ built the menu screen  <span class="fa">← this was good</span></p>
+        <p class="l gr">✓ added the score  <span class="fa">← this was good</span></p>
+        <p class="l rd">✗ rewrote the whole game in another language</p>
+        <p class="l">&nbsp;</p>
+        <p class="l fa">Option A: argue with it for 20 minutes</p>
+        <p class="l am">Option B: /rewind back to the good bit</p>
+      </div>
+    </div>`,
+
+  /* ---- Level 6 ---- */
+  verifyKinds: () => `
+    <div class="tree">
+      <div class="row top"><span class="d">website</span><b>take a screenshot and look at it</b><span>does it match the picture?</span></div>
+      <div class="row top"><span class="d">code</span><b>run the tests</b><span>do they all pass?</span></div>
+      <div class="row top"><span class="d">a list</span><b>count it</b><span>are there 17 or 16?</span></div>
+      <div class="row top"><span class="d">a game</span><b>play it</b><span>can you actually win?</span></div>
+      <div class="row top"><span class="d">a fix</span><b>make the bug happen again</b><span>does it still happen?</span></div>
+    </div>`,
+
+  /* ---- Level 7 ---- */
+  forgets: () => `
+    <div class="cmp">
+      <div class="col bad"><span class="lab">Monday</span>
+        <p class="say">&gt; always use British spelling<br>✓ got it</p>
+        <p class="why">You explain your rules. It follows them beautifully. You close the terminal.</p></div>
+      <div class="col bad"><span class="lab">Tuesday</span>
+        <p class="say">&gt; hello<br>Hi! What are we working on?</p>
+        <p class="why">Gone. Every word of it. A new session remembers nothing at all.</p></div>
+    </div>`,
+
+  notebookTree: () => `
+    <div class="tree">
+      <div class="row top"><span class="d">~/.claude/</span><b>CLAUDE.md</b><span>rules for everything you ever do</span></div>
+      <div class="row"><span class="d">my-game/</span><b>CLAUDE.md</b><span>rules for this project only</span></div>
+      <div class="row"><span class="d">my-game/art/</span><b>CLAUDE.md</b><span>rules just for the pictures</span></div>
+    </div>`,
+
+  notebookTop: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>CLAUDE.md</span></div>
+      <div class="mock-body">
+        <p class="l am"># Never delete files without asking me first.</p>
+        <p class="l am"># Never touch the art/ folder.</p>
+        <p class="l">&nbsp;</p>
+        <p class="l fa">This is a bouncing-ball game in one file.</p>
+        <p class="l fa">Use British spelling. Keep files short.</p>
+        <p class="l fa">Run the tests after every change.</p>
+      </div>
+    </div>`,
+
+  /* ---- Level 8: loops ---- */
+  youInLoop: () => `
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">🧑</div><b>You type</b><span>"do this bit"</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🤖</div><b>It answers</b><span>does the bit</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🧑</div><b>You read it</b><span>"ok, now this bit"</span></div>
+      <div class="farrow" aria-hidden="true">↺</div>
+    </div>`,
+
+  makerChecker: () => `
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">🤖</div><b>The maker</b><span>Does the actual work, one step at a time.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🦺</div><b>The checker</b><span>A second robot. Looks at the work and says "not yet, and here's why".</span></div>
+      <div class="farrow" aria-hidden="true">↺</div>
+    </div>`,
+
+  goalRecipe: () => `
+    <div class="recipe">
+      <div class="ing"><span class="k">1</span><span><b>A finish line it can see</b>
+        <span>Not "tidy up" — something it can actually look at and know it's done.</span>
+        <code>keep going until no files are left</code></span></div>
+      <div class="ing"><span class="k">2</span><span><b>A way to prove it</b>
+        <span>Usually a count, or a test, or "zero left". If you can't prove it, you can't finish it.</span>
+        <code>count the loose files in the folder</code></span></div>
+      <div class="ing"><span class="k">3</span><span><b>A guardrail</b>
+        <span>What it must never do, and when to give up. Always include the give-up number.</span>
+        <code>do not delete anything, and stop after 30 turns</code></span></div>
+    </div>`,
+
+  goalRun: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>Claude Code — /goal</span></div>
+      <div class="mock-body">
+        <p class="l cy">&gt; /goal sort every file in my downloads folder</p>
+        <p class="l cy">  into subfolders by type. Keep going until no</p>
+        <p class="l cy">  files are left. Do not delete anything and</p>
+        <p class="l cy">  stop after 30 turns.</p>
+        <p class="l">&nbsp;</p>
+        <p class="l fa">turn 1  found 17 loose files</p>
+        <p class="l fa">turn 2  created Images/ Docs/ Music/</p>
+        <p class="l fa">turn 3  moved 6 files … 11 left</p>
+        <p class="l fa">turn 4  moved 7 files … 4 left</p>
+        <p class="l fa">turn 5  moved 4 files … 0 left</p>
+        <p class="l am">turn 6  checking: counting loose files… 0</p>
+        <p class="l gr">✓ goal achieved — nothing deleted</p>
+      </div>
+    </div>`,
+
+  routineForm: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>New routine</span></div>
+      <div class="mock-body">
+        <p class="l fa">name     <span class="cy">morning email sort</span></p>
+        <p class="l fa">do this  <span class="cy">read my unread emails, pick the</span></p>
+        <p class="l fa">         <span class="cy">3 most important, message them to</span></p>
+        <p class="l fa">         <span class="cy">me on Slack. Do not reply to anyone.</span></p>
+        <p class="l fa">when     <span class="am">every day at 9:00 am</span></p>
+        <p class="l fa">tools    <span class="am">Gmail · Slack</span></p>
+        <p class="l">&nbsp;</p>
+        <p class="l gr">✓ saved — runs by itself from tomorrow</p>
+      </div>
+    </div>`,
+
+  /* ---- Level 9: skills ---- */
+  skillFolder: () => `
+    <div class="tree">
+      <div class="row top"><span class="d">~/.claude/skills/</span><b>tidy-my-photos/</b><span>the folder is the skill's name</span></div>
+      <div class="row"><span class="d">└─</span><b>SKILL.md</b><span>the instructions — this is the only required file</span></div>
+      <div class="row"><span class="d">└─</span><b>rename.py</b><span>optional: any helper files it needs</span></div>
+    </div>`,
+
+  skillCard: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>SKILL.md</span></div>
+      <div class="mock-body">
+        <p class="l fa">---</p>
+        <p class="l">name: <span class="cy">tidy-my-photos</span></p>
+        <p class="l">description: <span class="cy">Rename photos to the date they</span></p>
+        <p class="l">  <span class="cy">were taken and sort them into year folders.</span></p>
+        <p class="l fa">---</p>
+        <p class="l">&nbsp;</p>
+        <p class="l am"># How to tidy photos</p>
+        <p class="l fa">1. Read the date out of each photo.</p>
+        <p class="l fa">2. Rename it to YYYY-MM-DD-name.jpg</p>
+        <p class="l fa">3. Move it into a folder for that year.</p>
+        <p class="l fa">4. Never delete anything. Count what you moved.</p>
+      </div>
+    </div>`,
+
+  skillsOnOff: () => `
+    <div class="packs">
+      <div class="pack">
+        <div class="top"><b>Installed on this very computer</b><span>61 skills</span></div>
+        <div class="meter mid"><i style="width:100%"></i></div>
+        <div class="cap">A big toolbox. Collected over months.</div>
+      </div>
+      <div class="pack">
+        <div class="top"><b>Actually switched on</b><span>6 skills</span></div>
+        <div class="meter ok"><i style="width:10%"></i></div>
+        <div class="cap">Everything else is deliberately turned off. That is not laziness — it is the whole trick.</div>
+      </div>
+    </div>`,
+
+  /* ---- Level 10: subagents ---- */
+  ownBackpack: () => `
+    <div class="cmp">
+      <div class="col bad"><span class="lab">Doing it yourself</span>
+        <p class="say">read 40 log files<br>→ backpack 30% → 78%</p>
+        <p class="why">All forty files are now sitting in your main backpack, crowding out the actual job.</p></div>
+      <div class="col good"><span class="lab">Sending a teammate</span>
+        <p class="say">teammate reads 40 log files<br>→ your backpack 30% → 32%</p>
+        <p class="why">It reads them in its <i>own</i> backpack and hands you back one paragraph: the answer.</p></div>
+    </div>`,
+
+  crewThree: () => `
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">🔎</div><b>The researcher</b><span>Goes and reads things — docs, files, the web — so the reading never lands in your backpack.</span></div>
+      <div class="farrow" aria-hidden="true">·</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🦺</div><b>The reviewer</b><span>Never saw the work being made, so it has no pride in it. Same idea as Level 8's checker.</span></div>
+      <div class="farrow" aria-hidden="true">·</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🧪</div><b>The tester</b><span>Tries to break it and reports what broke, keeping all that noise out of your chat.</span></div>
+    </div>`,
+
+  whyClause: () => `
+    <div class="cmp">
+      <div class="col bad"><span class="lab">No reason given</span>
+        <p class="say">go and find out how the scoreboard works</p>
+        <p class="why">Comes back with everything it found. Most of it useless to you.</p></div>
+      <div class="col good"><span class="lab">Reason given</span>
+        <p class="say">find out how the scoreboard works, because I want to add a high-score table</p>
+        <p class="why">Now it knows what to keep and what to throw away. Much shorter, much better answer.</p></div>
+    </div>`,
+
+  /* ---- Level 11: MCP + hooks ---- */
+  mcpPlug: () => `
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">🤖</div><b>Your robot</b><span>Only knows files and commands on its own.</span></div>
+      <div class="farrow" aria-hidden="true">🔌</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">🌐</div><b>A plug-in tool</b><span>Now it can also drive a web browser, read a calendar, or search a docs site.</span></div>
+    </div>`,
+
+  hookWire: () => `
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>settings.json — a real tripwire on this computer</span></div>
+      <div class="mock-body">
+        <p class="l fa">"hooks": {</p>
+        <p class="l">  "<span class="am">Stop</span>": [ { "hooks": [ {</p>
+        <p class="l">    "type": "command",</p>
+        <p class="l">    "command": "<span class="cy">curl … localhost:3853/api/events</span>"</p>
+        <p class="l">  } ] } ]</p>
+        <p class="l fa">}</p>
+        <p class="l">&nbsp;</p>
+        <p class="l gr">→ every time the robot finishes, a little dashboard hears about it</p>
+      </div>
+    </div>`,
+
+  hookMoments: () => `
+    <div class="tree">
+      <div class="row top"><span class="d">PreToolUse</span><b>just before it uses a tool</b><span>last chance to block something</span></div>
+      <div class="row top"><span class="d">PostToolUse</span><b>just after it uses a tool</b><span>tidy up, reformat, log it</span></div>
+      <div class="row top"><span class="d">Notification</span><b>when it wants your attention</b><span>make a noise so you notice</span></div>
+      <div class="row top"><span class="d">Stop</span><b>when it has finished</b><span>ring a bell, send a message</span></div>
+    </div>`,
+
+  /* ---- Level 12: squad ---- */
+  squadPrice: () => `
+    <div class="packs">
+      <div class="pack">
+        <div class="top"><b>One robot, working normally</b><span>1×</span></div>
+        <div class="meter ok"><i style="width:14%"></i></div>
+        <div class="cap">What you have been doing for twelve levels.</div>
+      </div>
+      <div class="pack">
+        <div class="top"><b>A whole squad of them</b><span>about 7×</span></div>
+        <div class="meter bad"><i style="width:98%"></i></div>
+        <div class="cap">One person spent about $80 on a single question this way, and called it "a nuclear weapon aimed at your wallet".</div>
+      </div>
+    </div>`,
+
+  lanes: () => `
+    <div class="tree">
+      <div class="row top"><span class="d">lane 1</span><b>robot A builds the menu screen</b><span>its own copy of the files</span></div>
+      <div class="row top"><span class="d">lane 2</span><b>robot B builds the sound</b><span>its own copy of the files</span></div>
+      <div class="row"><span class="d">then</span><b>you join the lanes back together</b><span>one tidy result, no fighting</span></div>
+    </div>`,
+
+  /* ---- Level 13: capstone ---- */
+  capstone: () => `
+    <div class="recipe">
+      <div class="ing"><span class="k">1</span><span><b>Make a brand-new empty folder</b><span>Never your photos or schoolwork. Something you would not mind losing.</span></span></div>
+      <div class="ing"><span class="k">2</span><span><b>Start on the red light</b><span>Then move to yellow once you trust what it is doing.</span></span></div>
+      <div class="ing"><span class="k">3</span><span><b>Plan it on the green light first</b><span>And make it ask you at least ten questions.</span></span></div>
+      <div class="ing"><span class="k">4</span><span><b>Ask for one small piece at a time</b><span>Naming the file each time.</span></span></div>
+      <div class="ing"><span class="k">5</span><span><b>Put the proof in every instruction</b><span>"…then test it and tell me the result."</span></span></div>
+      <div class="ing"><span class="k">6</span><span><b>Write it a notebook with <code>/init</code></b><span>Add a rule the second time it repeats a mistake.</span></span></div>
+    </div>`
+};
+
+/* ---------- the deck ---------- */
+const LV = [
+  "Welcome",
+  "Level 0 · Hello, robot",
+  "Level 1 · Get the robot",
+  "Level 2 · The dugout tour",
+  "Level 3 · Traffic lights",
+  "Level 4 · One thing at a time",
+  "Level 5 · The whiteboard",
+  "Level 6 · Check the work",
+  "Level 7 · Give it a notebook",
+  "Level 8 · Out of the loop",
+  "Level 9 · Superpower cards",
+  "Level 10 · Teammates",
+  "Level 11 · Tools & tripwires",
+  "Level 12 · The whole squad",
+  "Level 13 · Coach your own crew",
+  "What's next",
+  "Act I recap · First day in the dugout",
+  "Act II recap · Build it right",
+  "Act III recap · Off the leash",
+  "Act IV recap · Build the bench"
+];
+const BADGES = [
+  { lv:1, name:"Met the robot" },
+  { lv:2, name:"Robot installed" },
+  { lv:3, name:"Reads the dashboard" },
+  { lv:4, name:"Safety first" },
+  { lv:5, name:"Clear instructions" },
+  { lv:6, name:"Plans before building" },
+  { lv:7, name:"Checks the work" },
+  { lv:8, name:"Keeps a notebook" },
+  { lv:9, name:"Loop builder" },
+  { lv:10, name:"Skill collector" },
+  { lv:11, name:"Crew boss" },
+  { lv:12, name:"Wired it up" },
+  { lv:13, name:"Knows the price" },
+  { lv:14, name:"Coach" },
+  { lv:16, name:"Act I complete" },
+  { lv:17, name:"Act II complete" },
+  { lv:18, name:"Act III complete" },
+  { lv:19, name:"Act IV complete" }
+];
+
+const S = [];
+const add = o => S.push(o);
+
+/* An act recap: four slides that turn a whole act into one real job. */
+function addMission(m) {
+  add({ lv:m.lv, kind:"idea", build: s => {
+    s.append(el("div", null, `<span class="mission-tag">${m.tag} · mission</span>`));
+    s.append(el("h3", null, m.name));
+    s.append(el("p","lede", m.task));
+    s.append(el("div","recipe", m.steps.map((t,i) =>
+      `<div class="ing"><span class="k">${i+1}</span><span>${t}</span></div>`).join("")));
+  }});
+  add({ lv:m.lv, kind:"idea", build: s => {
+    s.append(el("h3", null, "How you know you have finished"));
+    s.append(el("div","done-box", `<span class="eyebrow">Done means</span><p>${m.done}</p>`));
+    s.append(el("div","alarm", `<span class="eyebrow">The trap — nearly everyone hits this one</span><p>${m.trap}</p>`));
+  }});
+  add({ lv:m.lv, kind:"practice", challenge:m.ch, build: s => {
+    s.append(el("h3", null, "Practice the tricky bit"));
+    s.append(el("p","body-txt", m.lead));
+  }});
+  add({ lv:m.lv, kind:"recap", badge:m.lv, build: s => {
+    s.append(el("h3", null, m.name + " — done"));
+    s.append(el("p","body-txt", m.close));
+  }});
+}
+
+/* ---- welcome ---- */
+add({ lv:0, kind:"cover", build: s => {
+  s.append(el("div","cover",`
+    ${VIS.robot()}
+    <h2>Claude&nbsp;Code <span class="em">Academy</span></h2>
+    <p class="lede">You are about to learn how to coach a robot that builds things on a computer. One slide at a time. No rushing.</p>`));
+}});
+
+add({ lv:0, kind:"idea", build: s => {
+  s.append(el("h3",null,"How this works"));
+  s.append(el("div","vis",`
+    <div class="flow">
+      <div class="fstep"><div class="ico" aria-hidden="true">📖</div><b>One idea per slide</b><span>Read it, press Next. Nothing is hidden on other pages.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">⌨️</div><b>Then you try it</b><span>A pretend terminal you cannot break.</span></div>
+      <div class="farrow" aria-hidden="true">→</div>
+      <div class="fstep"><div class="ico" aria-hidden="true">★</div><b>Then a badge</b><span>Eighteen to collect. You earn one by doing the practice, not by scrolling past it.</span></div>
+    </div>`));
+  s.append(el("p","small","You can use the arrow keys on your keyboard instead of the buttons. Your place is saved automatically, so you can stop any time and come back."));
+}});
+
+/* ================= LEVEL 0 ================= */
+add({ lv:1, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">00</div><h2>Hello, robot</h2>
+    <p class="lede">Before you install anything, meet the thing you are about to coach.</p>`));
+}});
+
+add({ lv:1, kind:"idea", build: s => {
+  s.append(el("h3",null,"It is a robot that lives in a text box"));
+  s.append(el("p","body-txt","There are no buttons to click and no menus. You type what you want in ordinary words, press Enter, and it goes and does it."));
+  s.append(el("div","vis",VIS.termHello()));
+  s.append(el("p","small",`In this course that text box is called the <b>dugout</b>. <span class="word">grown-up word: terminal</span>`));
+}});
+
+add({ lv:1, kind:"idea", build: s => {
+  s.append(el("h3",null,"You are the coach, not the player"));
+  s.append(el("p","body-txt","The robot does the work. You decide what the work is, and — this is the part people skip — you check it afterwards."));
+  s.append(el("div","vis",VIS.coachLoop()));
+  s.append(el("div","note",`<span class="eyebrow">Remember this one</span><p>That third box is the whole difference between a good coach and a bad one. A robot that is never checked will happily hand you something broken.</p>`));
+}});
+
+add({ lv:1, kind:"idea", build: s => {
+  s.append(el("h3",null,"You do not need to know how to code"));
+  s.append(el("p","body-txt","Not one line. The robot writes all of it."));
+  s.append(el("p","body-txt","What you <i>do</i> need is to say clearly what you want. That turns out to be the genuinely hard part, and it is what most of this course is about."));
+  s.append(el("div","note",`<span class="eyebrow">What that means for you</span><p>If you can explain a game to a friend well enough for them to play it, you can already do the hardest part of this.</p>`));
+}});
+
+add({ lv:1, kind:"practice", challenge:{
+  goal:"Say hi to your robot. Type anything at all and press Enter — there is no wrong answer here.",
+  accept:[/\S{2,}/],
+  hints:["Type any words, like: hello robot","Click the dark box, type <code>hello</code>, then press Enter."]
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","This is a drawing of Claude Code. Nothing you type reaches your real computer, so you cannot break anything. Get it wrong on purpose a few times."));
+}});
+
+add({ lv:1, kind:"recap", badge:1, build: s => {
+  s.append(el("h3",null,"Level 0 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>It is a robot in a text box.</b> <span>Plain words in, work out.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>You coach it.</b> <span>Decide the job, then check the job.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>No coding needed.</b> <span>Clear explaining is the real skill.</span></span></div>
+    </div>`));
+}});
+
+/* ================= LEVEL 1 ================= */
+add({ lv:2, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">01</div><h2>Get the robot</h2>
+    <p class="lede">Three steps put it on your computer. One of them needs a grown-up.</p>`));
+}});
+
+add({ lv:2, kind:"idea", build: s => {
+  s.append(el("h3",null,"First, the catch: it costs money"));
+  s.append(el("p","body-txt","Claude Code needs a paid Claude plan. There is no free version. So this is the one slide you should read <i>with</i> the person who pays for things."));
+  s.append(el("div","grownup",`<span class="eyebrow">Grown-up page — read together</span><ul>
+    <li>It needs a paid Claude plan. Start with the cheapest one; you can always move up.</li>
+    <li>It can read and change files on this computer, and run commands. Level 3 is entirely about limiting that, and it is not optional.</li>
+    <li>Sit with the learner for the first few sessions. Not because it is dangerous by default, but because the interesting mistakes happen early.</li>
+    <li>Make a brand-new empty folder for practice. Never point it at your photos, documents, or work files while learning.</li>
+  </ul>`));
+}});
+
+add({ lv:2, kind:"idea", build: s => {
+  s.append(el("h3",null,"Three steps, and that is the whole install"));
+  s.append(el("div","vis",VIS.installFlow()));
+  s.append(el("p","small","The next three slides do one step each."));
+}});
+
+add({ lv:2, kind:"idea", build: s => {
+  s.append(el("h3",null,"Wait — where is the terminal?"));
+  s.append(el("p","body-txt","Every step from here starts in the terminal, so find it once and you are set. It is already on your computer. You do not install it."));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">Mac</span><span><b>Press Cmd and Space together</b> <span>type <code class="ic">terminal</code>, press Enter.</span></span></div>
+      <div class="co"><span class="n">Win</span><span><b>Press the Windows key</b> <span>type <code class="ic">powershell</code>, press Enter.</span></span></div>
+      <div class="co"><span class="n">Lin</span><span><b>Press Ctrl, Alt and T together</b> <span>or search for <code class="ic">terminal</code>.</span></span></div>
+    </div>`));
+  s.append(el("p","small","A window of plain text opens. That is it. That is the dugout you will be working in for the rest of this course."));
+}});
+
+add({ lv:2, kind:"idea", build: s => {
+  s.append(el("h3",null,"Step 1 — paste one line"));
+  s.append(el("p","body-txt","In the terminal you just opened, paste the line that matches your computer. Then press Enter and wait. It does everything by itself."));
+  const box = el("div","vis");
+  [["Mac or Linux","curl -fsSL https://claude.ai/install.sh | bash"],
+   ["Windows PowerShell","irm https://claude.ai/install.ps1 | iex"]].forEach(([lab,cmd]) => {
+    const w = el("div");
+    w.append(el("span","eyebrow cmd-label",lab));
+    const c = el("div","cmd",`<code>${esc(cmd)}</code>`);
+    const b = el("button",null,"Copy"); b.type = "button";
+    b.onclick = async () => {
+      try { await navigator.clipboard.writeText(cmd); b.textContent = "Copied"; }
+      catch (e) { b.textContent = "Select it"; }
+      setTimeout(() => { b.textContent = "Copy"; }, 1600);
+    };
+    c.append(b); w.append(c); box.append(w);
+  });
+  s.append(box);
+  s.append(el("div","alarm",`<span class="eyebrow">Check before you paste</span><p>Install commands change over time. Compare these against the official Claude Code install page before running them, and if the screen fills with red text, do not guess — show a grown-up the exact words.</p>`));
+}});
+
+add({ lv:2, kind:"idea", build: s => {
+  s.append(el("h3",null,"Step 2 — wake it up"));
+  s.append(el("p","body-txt",`First walk into the folder you want to work in. That is what <code class="ic">cd</code> does — "change directory", the terminal's way of opening a folder. Type <code class="ic">cd</code>, a space, then the folder's name.`));
+  s.append(el("p","body-txt",`Then type <code class="ic">claude</code> and press Enter. That is it — five letters. The robot starts up inside whatever folder you are standing in, which is why you walked there first.`));
+  s.append(el("div","vis",`
+    <div class="mock">
+      <div class="mock-bar"><i></i><i></i><i></i><span>Terminal</span></div>
+      <div class="mock-body">
+        <p class="l fa">$ cd my-first-project</p>
+        <p class="l">$ claude</p>
+        <p class="l">&nbsp;</p>
+        <p class="l gr">✻ Welcome to Claude Code</p>
+        <p class="l fa">  type /help for help</p>
+      </div>
+    </div>`));
+  s.append(el("p","small","It has to be started fresh from a terminal each time. There is no icon to double-click."));
+}});
+
+add({ lv:2, kind:"idea", build: s => {
+  s.append(el("h3",null,"Step 3 — tell it who you are"));
+  s.append(el("p","body-txt",`If it does not ask you by itself, type <code class="ic">/login</code>. A web page opens, you click yes, and you are in. You only do this once.`));
+  s.append(el("div","note",`<span class="eyebrow">Habit worth starting now</span><p>Anything beginning with a slash is a command for the app itself, not an instruction for the robot. You will meet a lot of these.</p>`));
+}});
+
+add({ lv:2, kind:"idea", build: s => {
+  s.append(el("h3",null,"One more thing it will ask"));
+  s.append(el("p","body-txt","The first time you start it in a new folder, it wants to know whether you trust the files in there."));
+  s.append(el("div","vis",VIS.trustPrompt()));
+  s.append(el("p","body-txt","That is the robot being careful, not broken. Say yes only for folders you made yourself."));
+}});
+
+add({ lv:2, kind:"practice", challenge:{
+  goal:"You have installed it and typed <code>claude</code>. Now sign in — type the command that logs you in.",
+  accept:[/^\/login\b/i],
+  hints:["It starts with a slash, and it is the same word a website uses when you sign in.","Type exactly: <code>/login</code>"]
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","Practice the sign-in command here first, so your fingers know it before you do it for real."));
+}});
+
+add({ lv:2, kind:"recap", badge:2, build: s => {
+  s.append(el("h3",null,"Level 1 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>It costs money.</b> <span>Paid plan, cheapest one first, grown-up involved.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Paste one line to install.</b> <span>Different line for Mac and Windows.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b><code class="ic">claude</code> starts it, <code class="ic">/login</code> signs you in.</b> <span>Then say yes to trusting your own folder.</span></span></div>
+    </div>`));
+  s.append(el("p","small","Do the real install now if you can. The rest of the course makes far more sense with it running in front of you."));
+}});
+
+/* ================= LEVEL 2 ================= */
+add({ lv:3, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">02</div><h2>The dugout tour</h2>
+    <p class="lede">Learn to read the little strip along the bottom. It tells you everything that matters.</p>`));
+}});
+
+add({ lv:3, kind:"idea", build: s => {
+  s.append(el("h3",null,"The bottom strip is the dashboard"));
+  s.append(el("p","body-txt","Four things live down there. Look at them before every instruction you give — it takes two seconds and it prevents most beginner disasters."));
+  s.append(el("div","vis",VIS.statusStrip()));
+}});
+
+add({ lv:3, kind:"idea", build: s => {
+  s.append(el("h3",null,"The percentage is its backpack"));
+  s.append(el("p","body-txt","Everything you have said, everything it has read, and everything it has replied is carried in a backpack. The backpack has a fixed size. As it fills, the robot gets slower and starts forgetting the earliest things you told it."));
+  s.append(el("div","vis",VIS.packs()));
+  s.append(el("p","small",`People who use this every day try hard to stay in that first green band. <span class="word">grown-up word: context window</span>`));
+}});
+
+add({ lv:3, kind:"idea", build: s => {
+  s.append(el("h3",null,"One job, one chat"));
+  s.append(el("p","body-txt","The backpack does not only fill up. It also goes stale. Spend an hour on the scoreboard, then start on the menu screen, and all that scoreboard talk is still in there — quietly dragging the robot back toward it."));
+  s.append(el("p","body-txt",`So when a job is genuinely finished, type <code class="ic">/clear</code> and start clean. New job, new chat.`));
+  s.append(el("p","small","It is the cheapest habit in this course, and the one most beginners never learn. Nothing is lost that matters — the robot's notebook survives, and you will meet that in Level 7."));
+}});
+
+add({ lv:3, kind:"idea", build: s => {
+  s.append(el("h3",null,"You never have to memorize commands"));
+  s.append(el("p","body-txt","Type a single slash. A menu appears. That is the single best habit a beginner can have — when you wonder whether something is possible, open the menu and read."));
+  s.append(el("div","vis",VIS.slashMenu()));
+}});
+
+add({ lv:3, kind:"idea", build: s => {
+  s.append(el("h3",null,"Three characters worth knowing"));
+  s.append(el("p","body-txt","What you type first changes what happens next."));
+  s.append(el("div","vis",VIS.prefixKeys()));
+}});
+
+add({ lv:3, kind:"practice", challenge:{
+  goal:"Open the robot's own list of commands. Two answers work here — either one counts.",
+  accept:[/^\/help\b/i, /^\/$/],
+  hints:["Try typing just a single slash character, then Enter.","Type <code>/help</code> and press Enter."],
+  tip:"While you are in here, try <code>/context</code> and then <code>/compact</code> and watch the backpack meter change."
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","Open the menu. Then poke around — this dugout understands about a dozen real commands."));
+}});
+
+add({ lv:3, kind:"recap", badge:3, build: s => {
+  s.append(el("h3",null,"Level 2 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>Four things on the strip.</b> <span>Brain, folder, traffic light, backpack.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Keep the backpack under half full.</b> <span><code class="ic">/compact</code> makes room; a fresh chat makes more.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>One slash opens everything.</b> <span>Plus <code class="ic">@</code> for a file and <code class="ic">!</code> to skip the robot.</span></span></div>
+    </div>`));
+}});
+
+/* ---- ACT I RECAP ---- */
+addMission({
+  lv:16, tag:"Act I", name:"First day in the dugout",
+  task:"Get your robot talking to you, and prove you can read its dashboard without help.",
+  steps:[
+    `<b>Say hello.</b><span>Type anything, press Enter. Watching it answer <i>is</i> the coach loop from Level 0: you decide, it does, you check.</span>`,
+    `<b>If you have a paid plan, install it.</b><span>Paste the one line for your computer, then type <code class="ic">claude</code> to wake it up (Level 1).</span>`,
+    `<b>Sign in with <code class="ic">/login</code>.</b><span>Say yes to the trust question — but only for a brand-new folder you made yourself.</span>`,
+    `<b>No plan yet? That is fine.</b><span>Use the practice dugout instead. It is a drawing, but the dashboard behaves the same way.</span>`,
+    `<b>Name all four things on the bottom strip.</b><span>Out loud: the brain, the folder, the traffic light, the backpack (Level 2).</span>`,
+    `<b>Type one slash and read the menu.</b><span>This is the habit that replaces memorizing commands forever.</span>`
+  ],
+  done:"You can point at the bottom strip and correctly say what each of the four parts means, without looking back at this course — and you have typed <code class=\"ic\">/login</code> at least once, for real or in practice.",
+  trap:"Pointing your first real folder at somewhere that already matters — your photos, your schoolwork. Make a brand-new empty folder instead. It costs nothing to lose.",
+  lead:"Sign yourself in one more time, from memory.",
+  ch:{ goal:"Sign yourself in. Type the command from Level 1.", accept:[/^\/login\b/i],
+       hints:["It starts with a slash and it is what a website calls it too.","Type <code>/login</code> and press Enter."],
+       tip:"That is Act I finished." },
+  close:"You can get the robot running and read what it is telling you. That is the whole of Act I, and it is the part most people skip."
+});
+
+/* ================= LEVEL 3 ================= */
+add({ lv:4, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">03</div><h2>Traffic lights</h2>
+    <p class="lede">The most important level here. Learn it before you build anything at all.</p>`));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"Why this one matters most"));
+  s.append(el("p","body-txt","Everything so far has been harmless. This is the slide where that changes."));
+  s.append(el("p","body-txt","The robot can change real files and run real commands on a real computer. That is exactly why it is useful — and exactly why you need a way to hold it back."));
+  s.append(el("div","alarm",`<span class="eyebrow">The honest version</span><p>In one of the courses this material came from, a person ran their robot with all the asking switched off. It ran a delete command and wiped their machine. Nothing in this course needs that setting.</p>`));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"One key combination controls it"));
+  s.append(el("p","body-txt","There is no menu to hunt through. You hold Shift and tap Tab, and the light changes. Press it again and it changes again."));
+  s.append(el("div","vis",VIS.shiftTab()));
+  s.append(el("p","small","This is the most-pressed shortcut there is. Get it into your fingers and you will never be unsure what the robot is allowed to do."));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"Looking is free. Touching is not."));
+  s.append(el("p","body-txt","Here is the rule underneath all three lights. The robot never asks before it <i>reads</i> something — reading cannot break anything, so it just gets on with it. The moment it wants to <i>change</i> a file, or run a command on your computer, it stops and asks."));
+  s.append(el("p","body-txt",`A command is an instruction typed straight to the computer rather than to the robot — the install line you pasted in Level 1 was one.`));
+  s.append(el("p","small","So when you watch it read six files without a word and then suddenly halt, nothing has gone wrong. It just reached the first thing that touches something."));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"Light 1 — start here"));
+  s.append(el("div","vis",VIS.lightRed()));
+  s.append(el("p","body-txt","Be annoyed for a week. It is the fastest way to learn what the robot actually does when nobody is watching it."));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"There are three answers, not two"));
+  s.append(el("p","body-txt","When it asks, you get three choices, not just yes and no."));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">1</span><span><b>Yes.</b> <span>Go ahead, just this once.</span></span></div>
+      <div class="co"><span class="n">2</span><span><b>No — and here is what to do instead.</b> <span>You can type the correction right there. This is the most useful button on the screen.</span></span></div>
+      <div class="co"><span class="n">3</span><span><b>Yes, and stop asking me about this one.</b> <span>Quietly adds that kind of job to a list it may do freely from now on.</span></span></div>
+    </div>`));
+  s.append(el("p","small","Use the middle one while you are learning. Saying “no, do it this way” is coaching — and it is far cheaper than letting it finish the wrong thing and starting over."));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"Light 2 — where you will live"));
+  s.append(el("div","vis",VIS.lightYellow()));
+  s.append(el("div","note",`<span class="eyebrow">The trade you are making</span><p>You gave up being asked every time, so now the checking is entirely your job. Faster, but only if you actually look at what it did.</p>`));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"Light 3 — thinking, not touching"));
+  s.append(el("div","vis",VIS.lightGreen()));
+  s.append(el("p","body-txt","This one becomes your favorite later on. Asking the robot to plan before it builds is a whole level of its own further along."));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"And the fourth light, which stays locked"));
+  s.append(el("div","vis",VIS.lightLocked()));
+  s.append(el("p","body-txt","It exists. Experienced people use it deliberately, in throwaway folders, on purpose. You are not missing anything by leaving it alone — nothing in Levels 0 to 13 needs it."));
+  s.append(el("div","alarm",`<span class="eyebrow">If a video tells you to turn it on</span><p>Finish this course first. Then decide for yourself, in a folder you would not mind losing.</p>`));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"There is a better answer than switching asking off"));
+  s.append(el("p","body-txt","People turn off the asking because it is slow. But the grown-up fix is not to remove the brakes — it is to build a smaller playground."));
+  s.append(el("div","vis",VIS.sandboxIdea()));
+  s.append(el("p","small","This is a set-up job for whoever manages the computer, not something you need today. It is here so you know the choice is not simply “safe and slow” or “fast and risky”."));
+}});
+
+add({ lv:4, kind:"idea", build: s => {
+  s.append(el("h3",null,"Make a copy first"));
+  s.append(el("p","body-txt","The lights stop the robot before it does something. This is what you do in case it already has."));
+  s.append(el("p","body-txt","Before you let it loose on anything you would be sad to lose, copy the whole folder and put the copy somewhere else. Right-click, copy, paste. That is the whole technique."));
+  s.append(el("div","done-box",`<span class="eyebrow">Your undo button</span><p>If a session goes badly wrong, delete the wreck and copy the good folder back. No arguing with it, no unpicking, no repair work. Ten seconds of preparation buys you that.</p>`));
+  s.append(el("p","small","Professionals have a fancier version of this. You do not need it today, and a copied folder has never once failed to work."));
+}});
+
+add({ lv:4, kind:"practice", challenge:{
+  goal:"Press Shift+Tab until the light is on YELLOW — accept edits. Watch the chip at the bottom of the dugout change color.",
+  mode:"yellow",
+  hints:["Click inside the dark box first so it is listening to your keyboard, then hold Shift and tap Tab.","Each press moves one light along: red → yellow → green → back to red. Stop when the chip reads ACCEPT EDITS."],
+  tip:"Then type an instruction on each light and watch how differently it answers."
+}, build: s => {
+  s.append(el("h3",null,"Your turn — the one to actually practice"));
+  s.append(el("p","body-txt","Do this until it is automatic. It is the muscle memory that keeps you safe."));
+}});
+
+add({ lv:4, kind:"recap", badge:4, build: s => {
+  s.append(el("h3",null,"Level 3 done — and that is the safety level"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b><kbd>Shift</kbd>+<kbd>Tab</kbd> switches the light.</b> <span>Check the chip before every instruction.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Red to learn, yellow to work, green to think.</b> <span>Fourth light left alone.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Small playground beats no brakes.</b> <span>Sandbox and an allowed list, if someone sets it up.</span></span></div>
+    </div>`));
+}});
+
+/* ================= LEVEL 4 ================= */
+add({ lv:5, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">04</div><h2>One thing at a time</h2>
+    <p class="lede">The robot is not bad at its job. It is bad at guessing what you meant.</p>`));
+}});
+
+add({ lv:5, kind:"idea", build: s => {
+  s.append(el("h3",null,"It does what you said, not what you meant"));
+  s.append(el("p","body-txt","This is the single biggest reason beginners get rubbish results. They ask for something fuzzy, get something wrong, and conclude the robot is stupid."));
+  s.append(el("div","vis",VIS.vagueVsPrecise()));
+  s.append(el("div","note",`<span class="eyebrow">The test to use</span><p>Before you press Enter, ask yourself: could a stranger read this and know whether it worked? If not, add detail until they could.</p>`));
+}});
+
+add({ lv:5, kind:"idea", build: s => {
+  s.append(el("h3",null,"One job per instruction"));
+  s.append(el("p","body-txt","It is tempting to describe your whole dream in one go. Resist it. Small steps are not slower — they are faster, because you never have to untangle four mistakes at once."));
+  s.append(el("div","vis",VIS.bigVsSmall()));
+}});
+
+add({ lv:5, kind:"idea", build: s => {
+  s.append(el("h3",null,"Steal its words"));
+  s.append(el("p","body-txt","Read what the robot says back to you. It will name things in its own way — and if you start using its names, it finds them instantly instead of hunting around."));
+  s.append(el("div","vis",VIS.itsWords()));
+  s.append(el("p","small","This is the real reason grown-up programmers get better results: they already know the proper names for things. You can shortcut that by copying the robot's vocabulary."));
+}});
+
+add({ lv:5, kind:"idea", build: s => {
+  s.append(el("h3",null,"Show it a picture"));
+  s.append(el("p","body-txt","Words are not the only way to be specific. Drag a picture straight into the dugout and it can look at it."));
+  s.append(el("p","body-txt","A screenshot of something you like. A photo of a sketch on paper. A drawing of the layout you want. Then say: “make my page look like this one.”"));
+  s.append(el("p","small","A picture settles arguments that ten careful sentences cannot. If you can point at it, you do not have to describe it."));
+}});
+
+add({ lv:5, kind:"idea", build: s => {
+  s.append(el("h3",null,"Say what you don't want, too"));
+  s.append(el("p","body-txt","It is eager. Ask for one thing and it will often do three, because it thinks it is helping. So close the door on the way out."));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">→</span><span><b>“Add the button, and don't change anything else.”</b></span></div>
+      <div class="co"><span class="n">→</span><span><b>“Make the file, but don't use it anywhere yet.”</b></span></div>
+    </div>`));
+  s.append(el("p","small","One sentence at the end saves you unpicking work you never asked for. A small ask can still produce a sprawling change — this is how you stop that."));
+}});
+
+add({ lv:5, kind:"practice", challenge:{
+  goal:"Write a clear instruction that points at one exact file. Use the @ character followed by a filename — for example @game.js — somewhere in your sentence.",
+  accept:[/@[\w.\-]{3,}/],
+  hints:["Start with something like: in @game.js make the ball bounce faster","Type <code>in @game.js make the ball bounce faster</code> and press Enter."],
+  tip:"Notice how much less guessing it has to do when you name the file."
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","Practice being specific. Name a file, name one change."));
+}});
+
+add({ lv:5, kind:"recap", badge:5, build: s => {
+  s.append(el("h3",null,"Level 4 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>Vague in, wrong out.</b> <span>Could a stranger tell whether it worked?</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>One job per instruction.</b> <span>Check after each one.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Use its own words.</b> <span>Read the reply, borrow the names.</span></span></div>
+    </div>`));
+}});
+
+/* ================= LEVEL 5 ================= */
+add({ lv:6, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">05</div><h2>The whiteboard</h2>
+    <p class="lede">Make it write the plan before it writes anything else.</p>`));
+}});
+
+add({ lv:6, kind:"idea", build: s => {
+  s.append(el("h3",null,"Wrong plans are cheap. Wrong buildings are not."));
+  s.append(el("p","body-txt","If the robot misunderstands you and builds the wrong thing, fixing it means unpicking real files. If it misunderstands you in a plan, you just say “no, not like that” and it rewrites a paragraph."));
+  s.append(el("div","vis",VIS.planFlow()));
+  s.append(el("div","note",`<span class="eyebrow">What the pros say</span><p>“A minute of planning saves you 10 minutes of building.” It sounds like a poster in a classroom. It is also just true.</p>`));
+}});
+
+add({ lv:6, kind:"idea", build: s => {
+  s.append(el("h3",null,"Ask it to ask you more"));
+  s.append(el("p","body-txt","On the green light it will usually ask you three or four questions. That is rarely enough for anything interesting."));
+  s.append(el("p","body-txt",`So say so: <code class="ic">ask me 20 questions before you make the plan</code>. The questions are the useful bit — half of them will be things you had not thought about.`));
+  s.append(el("div","note",`<span class="eyebrow">Sneaky side effect</span><p>By answering its questions you end up understanding your own project properly — without reading a single line of code.</p>`));
+}});
+
+add({ lv:6, kind:"idea", build: s => {
+  s.append(el("h3",null,"Read the plan. Actually read it."));
+  s.append(el("p","body-txt","This is the one step everybody skips. The plan is where you catch the misunderstanding, and it costs you thirty seconds."));
+  s.append(el("p","body-txt",`When it looks right, let it build — and if the job is big, clear the chat first with <code class="ic">/clear</code> so the backpack starts empty.`));
+}});
+
+add({ lv:6, kind:"idea", build: s => {
+  s.append(el("h3",null,"Read the offer before you accept it"));
+  s.append(el("p","body-txt","When it hands you a plan you get more than yes and no. One of the choices is “go ahead, and stop asking me about the edits” — which quietly walks you off the red light and onto the green one."));
+  s.append(el("div","alarm",`<span class="eyebrow">Worth knowing before you click it</span><p>That option is not wrong. But it is a different light, chosen in a hurry, at the exact moment you are keenest to see the thing built. Pick it on purpose or not at all.</p>`));
+  s.append(el("p","body-txt","And a plan is not a contract. Agreeing to it makes it likely, not certain — so check what it built against what it promised, the same as always."));
+}});
+
+add({ lv:6, kind:"idea", build: s => {
+  s.append(el("h3",null,"When it goes wrong, rewind — do not argue"));
+  s.append(el("p","body-txt","Sooner or later it will take a badly wrong turn. Your instinct will be to explain, at length, why it was wrong. Do not."));
+  s.append(el("div","vis",VIS.rewind()));
+  s.append(el("p","body-txt",`Arguing leaves all the bad ideas sitting in the backpack, making everything afterwards worse. Rewinding goes back to before the mistake, as if it never happened.`));
+  s.append(el("div","note",`<span class="eyebrow">How to reach it</span><p>Try <code class="ic">/rewind</code>, or tap <kbd>Esc</kbd> twice. Which one your version uses can differ — if neither does anything, type <code class="ic">/help</code> and look for "rewind". That habit of checking the menu is Level 2 doing its job.</p>`));
+}});
+
+add({ lv:6, kind:"practice", challenge:{
+  goal:"Switch the dugout to the green light — Plan only — with Shift+Tab, then give it any instruction and watch it plan instead of build.",
+  mode:"green",
+  hints:["Click the dark box, then hold Shift and tap Tab until the chip says PLAN ONLY.","Red → yellow → green. Three presses from the start."],
+  tip:"Now type something and compare the answer to what the yellow light did."
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","Get to the green light, then give it a job and read what it says."));
+}});
+
+add({ lv:6, kind:"recap", badge:6, build: s => {
+  s.append(el("h3",null,"Level 5 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>Plan before building.</b> <span>Green light, then read it.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Demand more questions.</b> <span>“Ask me 20 questions first.”</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Rewinding beats arguing.</b> <span>Go back to before the wrong turn instead of explaining it.</span></span></div>
+    </div>`));
+}});
+
+/* ================= LEVEL 6 ================= */
+add({ lv:7, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">06</div><h2>Check the work</h2>
+    <p class="lede">If you only remember one level from this whole course, make it this one.</p>`));
+}});
+
+add({ lv:7, kind:"idea", build: s => {
+  s.append(el("h3",null,"“Done” is not the same as “working”"));
+  s.append(el("p","body-txt","The robot will tell you it has finished. It genuinely believes this. It is also sometimes completely wrong, and it has no way of knowing that unless somebody looks."));
+  s.append(el("div","vis",VIS.coachLoop()));
+  s.append(el("div","alarm",`<span class="eyebrow">The line worth memorizing</span><p>“If you don't give it the ability to verify its own results, you lose the vast majority of the value of AI.” That is not a warning about safety. It is a warning about wasting your time.</p>`));
+}});
+
+add({ lv:7, kind:"idea", build: s => {
+  s.append(el("h3",null,"Every kind of job has its own check"));
+  s.append(el("p","body-txt","The trick is picking a check the robot can run by itself, over and over, without you."));
+  s.append(el("div","vis",VIS.verifyKinds()));
+}});
+
+add({ lv:7, kind:"idea", build: s => {
+  s.append(el("h3",null,"So build the check into the instruction"));
+  s.append(el("p","body-txt","Do not ask for the work and then check it yourself later. Ask for the work <i>and</i> the proof, in the same breath."));
+  s.append(el("div","vis",`
+    <div class="cmp">
+      <div class="col bad"><span class="lab">No check</span>
+        <p class="say">fix the bug where the ball goes through the paddle</p>
+        <p class="why">It says “fixed!”. Did it? Who knows.</p></div>
+      <div class="col good"><span class="lab">Check included</span>
+        <p class="say">fix the bug where the ball goes through the paddle, then play 20 bounces and tell me if it ever gets through</p>
+        <p class="why">Now it has to prove it, and it will catch its own mistake before you do.</p></div>
+    </div>`));
+}});
+
+add({ lv:7, kind:"practice", challenge:{
+  goal:"Ask the robot to do something AND prove it worked in the same sentence. Include the word “check”, “test”, “prove” or “count”.",
+  accept:[/\b(check|test|prove|count|verify)\w*\b/i],
+  hints:["Try: make a list of 10 names, then count them and tell me how many","Type <code>make a list of 10 names, then count them</code> and press Enter."],
+  tip:"That habit — work plus proof, always together — is the whole level."
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","Give one instruction that contains both the job and the proof."));
+}});
+
+add({ lv:7, kind:"recap", badge:7, build: s => {
+  s.append(el("h3",null,"Level 6 done — the important one"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>“Done” is a claim, not a fact.</b> <span>Somebody has to look.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Pick a check it can run itself.</b> <span>A count, a test, a screenshot, a playthrough.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Job and proof in one instruction.</b> <span>Never separately.</span></span></div>
+    </div>`));
+}});
+
+/* ================= LEVEL 7 ================= */
+add({ lv:8, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">07</div><h2>Give it a notebook</h2>
+    <p class="lede">Right now it forgets you completely every time you close the terminal.</p>`));
+}});
+
+add({ lv:8, kind:"idea", build: s => {
+  s.append(el("h3",null,"It has no memory between sessions"));
+  s.append(el("p","body-txt","This surprises everyone. You spend an hour teaching it your preferences, close the window, come back — and it is a total stranger again."));
+  s.append(el("div","vis",VIS.forgets()));
+}});
+
+add({ lv:8, kind:"idea", build: s => {
+  s.append(el("h3",null,"One command fixes it"));
+  s.append(el("p","body-txt",`Type <code class="ic">/init</code> in your project folder. The robot reads everything in there and writes itself a notebook file called <code class="ic">CLAUDE.md</code>.`));
+  s.append(el("p","body-txt","From then on it reads that notebook every single time it starts, before you say a word. It is not a chat — it is standing instructions."));
+  s.append(el("div","note",`<span class="eyebrow">Why this saves you money too</span><p>Without a notebook it has to re-read your whole project to work out what's going on. With one, it already knows.</p>`));
+}});
+
+add({ lv:8, kind:"idea", build: s => {
+  s.append(el("h3",null,"Put the hard rules at the very top"));
+  s.append(el("p","body-txt","Robots are like people: they remember the beginning and the end of a long list, and go fuzzy in the middle. So anything that really matters goes first."));
+  s.append(el("div","vis",VIS.notebookTop()));
+  s.append(el("p","small","Short and blunt beats long and polite. “Never delete files without asking” is a good rule. “Please try to be careful” is not a rule at all."));
+}});
+
+add({ lv:8, kind:"idea", build: s => {
+  s.append(el("h3",null,"Keep it short, and use more than one"));
+  s.append(el("p","body-txt","A giant notebook gets read every single time, which fills the backpack before you have even started. So split it up — a general one for you, a small one per project, and even one inside a folder that has its own quirks."));
+  s.append(el("div","vis",VIS.notebookTree()));
+  s.append(el("p","small",`That <code class="ic">~</code> is shorthand for your own home folder, and a name starting with a dot is simply a folder your computer keeps out of sight. Nothing clever. Only the notebooks that matter for the current job get opened — narrow beats big.`));
+}});
+
+add({ lv:8, kind:"idea", build: s => {
+  s.append(el("h3",null,"The rule for growing it"));
+  s.append(el("p","body-txt","Do not sit down and write a huge notebook up front. You will guess wrong."));
+  s.append(el("p","body-txt","Instead: the <b>second</b> time the robot makes the same mistake, write that one down. A notebook grown this way is short and every line of it earns its place."));
+  s.append(el("div","note",`<span class="eyebrow">And prune it</span><p>Every few weeks, read it and delete anything the robot no longer gets wrong. Notebooks rot, exactly like a messy bedroom.</p>`));
+}});
+
+add({ lv:8, kind:"practice", challenge:{
+  goal:"Give the robot a notebook for this folder. Type the command that reads the project and writes CLAUDE.md.",
+  accept:[/^\/init\b/i],
+  hints:["It is short, starts with a slash, and means “get started”.","Type <code>/init</code> and press Enter."],
+  tip:"Then run /context and notice the notebook now has a line of its own."
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","Write the notebook."));
+}});
+
+add({ lv:8, kind:"recap", badge:8, build: s => {
+  s.append(el("h3",null,"Level 7 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>New session = total amnesia.</b> <span>Unless there is a notebook.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b><code class="ic">/init</code> writes CLAUDE.md.</b> <span>Read automatically, every start.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Hard rules at the top. Keep it short.</b> <span>Add a line on the second repeat mistake.</span></span></div>
+    </div>`));
+}});
+
+/* ---- ACT II RECAP ---- */
+addMission({
+  lv:17, tag:"Act II", name:"Build it right",
+  task:"Build one small real thing — a bouncing ball is perfect — using all four habits, in order, on purpose.",
+  steps:[
+    `<b>Start on the red light.</b><span>Let it ask you before every change, just for the first few minutes (Level 3).</span>`,
+    `<b>Give one precise instruction, naming one file.</b><span>“in <code class="ic">@game.js</code>, make the ball bounce faster” (Level 4). One job. Not four.</span>`,
+    `<b>Before the next big piece, flip to green.</b><span>Let it plan instead of build. Ask it for 20 questions, and actually read the answers (Level 5).</span>`,
+    `<b>Move to yellow and let it build — with the check in the same sentence.</b><span>“…then play 20 bounces and tell me if it ever breaks” (Level 6).</span>`,
+    `<b>Run <code class="ic">/init</code> and put your hardest rule at the top.</b><span>Something like “never delete a file without asking me” (Level 7).</span>`,
+    `<b>Give one more small instruction.</b><span>Watch it obey the rule you just wrote, without you repeating yourself. That is the notebook working.</span>`
+  ],
+  done:"You have a small thing that actually works, a moment where the robot <i>proved</i> it worked instead of just claiming it, and a <code class=\"ic\">CLAUDE.md</code> file in the folder with at least one real rule in it.",
+  trap:"Accepting “done” as a fact instead of a claim — moving on the second it says “fixed!”. If you did not ask it to check, it did not check.",
+  lead:"Write one instruction that contains both the job and its proof.",
+  ch:{ goal:"Ask for a small change AND its proof, in one sentence. Include “check”, “test”, “prove” or “count”.",
+       accept:[/\b(check|test|prove|count|verify)\w*\b/i],
+       hints:["Try: make a list of 10 names, then count them and tell me how many","Type <code>make a list of 10 names, then count them</code>"],
+       tip:"Job plus proof, always in the same breath." },
+  close:"Those four habits are the course. Everything after this act is a way of doing them with less effort — not a replacement for them."
+});
+
+/* ================= LEVEL 8 — LOOPS ================= */
+add({ lv:9, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">08</div><h2>Out of the loop</h2>
+    <p class="lede">Everything so far needed you sitting there. This is where that stops.</p>`));
+  s.append(el("div","note",`<span class="eyebrow">Heads up — this one is a step up</span><p>You can do this level with everything you already know, but it is the first genuinely advanced idea in the course. Take it slowly, and it is fine to come back to it later.</p>`));
+}});
+
+add({ lv:9, kind:"idea", build: s => {
+  s.append(el("h3",null,"Right now, you are the loop"));
+  s.append(el("p","body-txt","Look at what you have actually been doing this whole time. You type, it answers, you read it, you decide what is next, you type again."));
+  s.append(el("div","vis",VIS.youInLoop()));
+  s.append(el("p","body-txt","You are not the coach in that picture. You are a component. Every single step waits for you."));
+}});
+
+add({ lv:9, kind:"idea", build: s => {
+  s.append(el("h3",null,"So take yourself out of it"));
+  s.append(el("p","body-txt","That is the whole idea, and it has a name: <b>loop engineering</b>. You build a little system that does the typing, checks the work, and decides the next step — so it keeps going without you."));
+  s.append(el("p","body-txt","The cheap version is one line you can add to any instruction today:"));
+  s.append(el("div","vis",`<div class="cmp"><div class="col good" style="grid-column:1/-1"><span class="lab">Add this to the end</span><p class="say">…don't stop until every single one is done.</p><p class="why">That one sentence turns a single answer into a loop.</p></div></div>`));
+}});
+
+add({ lv:9, kind:"idea", build: s => {
+  s.append(el("h3",null,"Two robots: a maker and a checker"));
+  s.append(el("p","body-txt","Remember Level 6, where checking the work was your job? This is the upgrade: a <i>second</i> robot does the checking."));
+  s.append(el("div","vis",VIS.makerChecker()));
+  s.append(el("p","body-txt","The checker never did the work, so it has no pride in it. That is exactly why it spots things the maker cannot — the same reason you get a friend to proofread your homework instead of reading it a fourth time yourself."));
+}});
+
+add({ lv:9, kind:"idea", build: s => {
+  s.append(el("h3",null,"The recipe for a loop that works"));
+  s.append(el("p","body-txt","There is a command for this — <code class=\"ic\">/goal</code> — and it needs exactly three things from you."));
+  s.append(el("div","vis",VIS.goalRecipe()));
+}});
+
+add({ lv:9, kind:"idea", build: s => {
+  s.append(el("h3",null,"What that looks like when it runs"));
+  s.append(el("p","body-txt","Here is the whole recipe in one real instruction — tidying up a messy downloads folder."));
+  s.append(el("div","vis",VIS.goalRun()));
+  s.append(el("p","small","Notice turn 6. It did not just stop when it felt finished — it counted, and the count is what proved it."));
+}});
+
+add({ lv:9, kind:"idea", build: s => {
+  s.append(el("h3",null,"The hard part is not the robot. It is you."));
+  s.append(el("p","body-txt","Writing the loop is easy. Deciding what “done” means is the thing that will actually stump you."));
+  s.append(el("div","alarm",`<span class="eyebrow">Straight from the source</span><p>“Defining what good and done looks like is the hardest part of creating the loop.”</p><p>Sorting files is easy — you can count them. But what makes a <i>good</i> drawing? A <i>good</i> message to a friend? If you cannot say how you would prove it, you cannot loop it yet.</p>`));
+  s.append(el("p","body-txt","This is genuinely a thinking skill, not a computer skill. It is also the most useful thing in this level."));
+}});
+
+add({ lv:9, kind:"idea", build: s => {
+  s.append(el("h3",null,"And then it can run on a clock"));
+  s.append(el("p","body-txt","Once a loop knows when it is finished, you can give it a time instead of a nudge. That is called a <b>routine</b>: what to do, when to do it, and which tools it may use."));
+  s.append(el("div","vis",VIS.routineForm()));
+  s.append(el("p","small",`These scheduled ones do not live in your terminal — they run on Claude's side, and you set them up with <code class="ic">/schedule</code>. That is also why they can fire at 9am while your laptop is shut.`));
+  s.append(el("p","body-txt","In a real setup people run a maker at 8am and its checker at 10am, so the checker reviews everything the maker did while nobody was watching."));
+  s.append(el("div","alarm",`<span class="eyebrow">Do not build this one alone</span><p>A routine runs with nobody watching, and connecting it to real email or messages means real messages get sent. Everything in Level 3 applies double here. Set your first one up with a grown-up, and start with something that only ever <i>reads</i> and reports.</p>`));
+}});
+
+add({ lv:9, kind:"practice", challenge:{
+  goal:"Write a goal with all three ingredients. Include the words “until” (the finish line) and “stop after” (the guardrail).",
+  accept:[/until[\s\S]*stop after/i],
+  hints:["Try: /goal rename every photo to the date it was taken, keep going until none have the old name, and stop after 20 turns","Type <code>/goal tidy the folder until no files are left, stop after 20 turns</code>"],
+  tip:"You just wrote a loop. That is the actual skill."
+}, build: s => {
+  s.append(el("h3",null,"Your turn — write a loop"));
+  s.append(el("p","body-txt","A finish line, and a give-up number. Both in one sentence."));
+}});
+
+add({ lv:9, kind:"recap", badge:9, build: s => {
+  s.append(el("h3",null,"Level 8 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>You were the loop.</b> <span>Loop engineering takes you out of it.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Maker plus checker.</b> <span>A second robot reviews, because it has no pride in the work.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Finish line, proof, guardrail.</b> <span>All three, or it never stops properly.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Defining “done” is the hard bit.</b> <span>And it is a thinking skill, not a typing one.</span></span></div>
+    </div>`));
+}});
+
+/* ---- ACT III RECAP ---- */
+addMission({
+  lv:18, tag:"Act III", name:"Off the leash",
+  task:"Write one real loop and let it run all the way to the end without you typing anything in between.",
+  steps:[
+    `<b>Notice the shape of what you have been doing.</b><span>Type, wait, read, decide, type again. You are the loop (Level 8).</span>`,
+    `<b>Pick something real and repetitive.</b><span>A messy folder to sort, a pile of files to rename. It must be something where you can say exactly what “finished” means.</span>`,
+    `<b>Write the finish line.</b><span>“…keep going until no files are left.” Not “tidy it up” — something it can actually look at.</span>`,
+    `<b>Write the proof.</b><span>Usually a count. If you cannot say how it would prove it, you cannot loop it yet.</span>`,
+    `<b>Write the guardrail, including the give-up number.</b><span>“Do not delete anything, and stop after 30 turns.” Never skip the give-up number.</span>`,
+    `<b>Send it, then sit on your hands.</b><span>No nudging. Watch the turns tick by on their own.</span>`
+  ],
+  done:"The loop stopped <i>by itself</i> — not because you got bored and closed it. Either it hit the proof (the count came back zero) or it hit the give-up number. You can point at the exact turn where it said so.",
+  trap:"Writing a finish line with no way to prove it, or forgetting the give-up number — so it either never knows it is done, or never knows when to give up trying.",
+  lead:"Write a goal with all three ingredients in one sentence.",
+  ch:{ goal:"Write a /goal with a finish line and a guardrail. Include the words “until” and “stop after”.",
+       accept:[/until[\s\S]*stop after/i],
+       hints:["Try: /goal tidy the folder until no files are left, stop after 20 turns","Type <code>/goal tidy the folder until no files are left, stop after 20 turns</code>"],
+       tip:"You just wrote a loop that knows how to stop." },
+  close:"You can now hand the robot a job that finishes itself. Defining “done” was the hard part, and that is a thinking skill you keep for life."
+});
+
+/* ================= LEVEL 9 — SKILLS ================= */
+add({ lv:10, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">09</div><h2>Superpower cards</h2>
+    <p class="lede">Teach the robot something once, and it knows it forever.</p>`));
+}});
+
+add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"A skill is just a written-down playbook"));
+  s.append(el("p","body-txt","Think of something you explain to the robot the same way every time. How you like your files named. The mistakes it must never make. The steps you always want followed."));
+  s.append(el("p","body-txt","Write that down once, in a file, and it becomes a <b>skill</b>. A superpower card the robot can pick up whenever it needs it."));
+  s.append(el("div","note",`<span class="eyebrow">Why not just put it in the notebook?</span><p>The notebook from Level 7 is read <i>every single time</i>, so it fills the backpack. A skill is only opened when it is actually needed. Same knowledge, far cheaper.</p>`));
+}});
+
+add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"And a skill is genuinely just a folder"));
+  s.append(el("p","body-txt","No installer, no magic. A folder with one file in it. If you can make a folder, you can make a skill."));
+  s.append(el("div","vis",VIS.skillFolder()));
+  s.append(el("div","vis",VIS.skillCard()));
+  s.append(el("p","small","The bit at the top between the dashes is how the robot decides whether this card is relevant right now. Write that description clearly and it will reach for the card at the right moment."));
+}});
+
+add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"Way 1 — install one from a shop"));
+  s.append(el("p","body-txt","Some skills come bundled as <b>plugins</b>, from a marketplace. Two commands: add the shop, then install from it. This one gives your robot the ability to watch videos."));
+  s.append(cmdEl("Inside Claude Code — add the shop", "/plugin marketplace add oxbshw/watch-skill"));
+  s.append(cmdEl("Then install it", "/plugin install watch-skill@watch-skill"));
+  s.append(cmdEl("Then set it up once", "/watch-skill:setup-watch-skill"));
+  s.append(el("p","small",`Useful neighbours: <code class="ic">/plugin list</code> shows what you have, and <code class="ic">/plugin uninstall watch-skill@watch-skill</code> removes it again.`));
+}});
+
+add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"Way 2 — copy a folder from the internet"));
+  s.append(el("p","body-txt","Most skills are simpler than that: someone put a folder on GitHub, and you copy it into your skills folder. This one gives you a council of five advisers who argue about your decisions."));
+  s.append(cmdEl("In your terminal (not inside Claude Code)", "git clone https://github.com/tenfoldmarc/llm-council-skill ~/.claude/skills/llm-council"));
+  s.append(el("p","body-txt",`Restart Claude Code and say "council this: should I…". That is the entire installation.`));
+}});
+
+add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"Way 3 — a skill that installs itself"));
+  s.append(el("p","body-txt","Bigger skills sometimes ship as a proper program that puts itself in the right place. This one turns any project into a map you can ask questions about."));
+  s.append(cmdEl("In your terminal", "uv tool install graphifyy"));
+  s.append(cmdEl("Then let it register itself", "graphify install"));
+  s.append(el("div","alarm",`<span class="eyebrow">Read the spelling twice</span><p>The package is <code class="ic">graphifyy</code> with two y's. Other similarly-named ones on the internet are not the same thing. This is a genuinely good habit: check the exact name before installing anything.</p>`));
+}});
+
+add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"Way 4 — the enormous one"));
+  s.append(el("p","body-txt","Some people share their whole setup: hundreds of skills, dozens of teammates, and rules for every programming language. This is what a fully-loaded robot looks like."));
+  s.append(cmdEl("The easy way, inside Claude Code", "/plugin marketplace add https://github.com/affaan-m/ECC"));
+  s.append(cmdEl("then", "/plugin install ecc@ecc"));
+  s.append(el("p","small","There is also a manual way — clone the repository and run its own installer — but pick one method and stick to it. Its instructions specifically warn against mixing the two."));
+  s.append(el("div","note",`<span class="eyebrow">Do not do this one yet</span><p>Installing hundreds of skills before you have needed a single one is how people end up confused. Come back to this when something you do often feels repetitive.</p>`));
+}});
+
+add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"And now the twist"));
+  s.append(el("p","body-txt","Here is what is actually installed on the computer this course was built on — and what is actually switched on."));
+  s.append(el("div","vis",VIS.skillsOnOff()));
+  s.append(el("p","body-txt","Fifty-five of them are deliberately turned off. Here is why that matters. Every switched-on skill gets read at the start of every conversation. Hoard a hundred of them and your backpack is half full before you type a word."));
+  s.append(el("div","note",`<span class="eyebrow">The rule</span><p>Collect a big toolbox. Carry a small number of tools. They are not the same thing.</p>`));
+}});
+
+add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"How to switch one off"));
+  s.append(el("p","body-txt",`Two ways. The first is to add one line to the skill's own file. Now the robot never reaches for it on its own, but you can still call it by name:`));
+  s.append(cmdEl("in SKILL.md, between the dashes", "disable-model-invocation: true"));
+  s.append(el("p","body-txt",`Or, for skills you did not write, list them in your settings file:`));
+  s.append(cmdEl("~/.claude/settings.json", '"skillOverrides": { "browse": "off", "canary": "off" }'));
+  s.append(el("div","alarm",`<span class="eyebrow">Honest footnote</span><p>Switching a skill off stops it being used. But right now it does not always hide the skill completely. A bit of it can still be read at the start.</p><p>So the real defense is simpler. Do not install skills you do not need yet.</p>`));
+}});
+
+add({ lv:10, kind:"practice", challenge:{
+  goal:"Have a look at what a plugin install looks like. Type the command that adds a marketplace — the shop — using oxbshw/watch-skill.",
+  accept:[/^\/plugin\s+marketplace\s+add\s+\S+/i],
+  hints:["It begins <code>/plugin marketplace add</code> and then the shop's name.","Type <code>/plugin marketplace add oxbshw/watch-skill</code>"],
+  tip:"In the real thing this downloads the plugin and makes its commands available."
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","Practice the shape of the command here first."));
+}});
+
+add({ lv:10, kind:"recap", badge:10, build: s => {
+  s.append(el("h3",null,"Level 9 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>A skill is a folder with a SKILL.md.</b> <span>Cheaper than the notebook, because it only loads when needed.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Four ways in.</b> <span>A marketplace, a git clone, a self-installing program, or a whole shared setup.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Switching off matters as much as installing.</b> <span>Big toolbox, small number of tools carried.</span></span></div>
+    </div>`));
+}});
+
+/* ================= LEVEL 10 — SUBAGENTS ================= */
+add({ lv:11, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">10</div><h2>Teammates</h2>
+    <p class="lede">Send somebody else to do the reading.</p>`));
+}});
+
+add({ lv:11, kind:"idea", build: s => {
+  s.append(el("h3",null,"The problem teammates solve"));
+  s.append(el("p","body-txt","Reading is what fills the backpack. Forty files skimmed to find one answer, and suddenly there is no room left for the actual job."));
+  s.append(el("div","vis",VIS.ownBackpack()));
+  s.append(el("p","body-txt","A teammate gets its own backpack. It does the messy reading over there, and hands you back only the answer. This is the single best trick for staying in that green band from Level 2."));
+}});
+
+add({ lv:11, kind:"idea", build: s => {
+  s.append(el("h3",null,"Three worth hiring"));
+  s.append(el("p","body-txt","You can invent any teammate you like, but almost everyone ends up with these three."));
+  s.append(el("div","vis",VIS.crewThree()));
+  s.append(el("p","small",`Have a look at yours with <code class="ic">/agents</code>. Each one is a small file in <code class="ic">~/.claude/agents/</code> saying what it is for, which tools it may use, and which brain it should use.`));
+}});
+
+add({ lv:11, kind:"idea", build: s => {
+  s.append(el("h3",null,"Always tell them why"));
+  s.append(el("p","body-txt","A teammate sent off with no reason brings back everything it found. A teammate that knows <i>why</i> you asked brings back the useful part."));
+  s.append(el("div","vis",VIS.whyClause()));
+  s.append(el("div","note",`<span class="eyebrow">Same idea as Level 4</span><p>“Be specific” did not stop being true just because you are now talking to a robot about another robot.</p>`));
+}});
+
+add({ lv:11, kind:"idea", build: s => {
+  s.append(el("h3",null,"Give the small jobs to the small brain"));
+  s.append(el("p","body-txt","A teammate whose job is “read this log and tell me the error” does not need the big expensive brain. Give it the quick cheap one and save the clever one for the thinking."));
+  s.append(cmdEl("in an agent file, or a skill", "model: haiku"));
+  s.append(el("p","small","This is where the money actually goes in a big project — not in the clever work, but in a hundred small errands run by an overqualified robot."));
+}});
+
+add({ lv:11, kind:"practice", challenge:{
+  goal:"Look at your crew. Type the command that lists your teammates.",
+  accept:[/^\/agents\b/i],
+  hints:["One word after a slash, and it is the grown-up word for teammates.","Type <code>/agents</code> and press Enter."],
+  tip:"In the real thing this is also where you create new ones."
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","See who is on the team."));
+}});
+
+add({ lv:11, kind:"recap", badge:11, build: s => {
+  s.append(el("h3",null,"Level 10 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>Teammates have their own backpack.</b> <span>Only the answer comes back to you.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Researcher, reviewer, tester.</b> <span>The reviewer works precisely because it never saw the work being made.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Say why, and use a small brain.</b> <span>Better answers, less money.</span></span></div>
+    </div>`));
+}});
+
+/* ================= LEVEL 11 — MCP + HOOKS ================= */
+add({ lv:12, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">11</div><h2>Tools &amp; tripwires</h2>
+    <p class="lede">Two separate ideas that both mean "connect it to something else".</p>`));
+}});
+
+add({ lv:12, kind:"idea", build: s => {
+  s.append(el("h3",null,"Plug-in tools"));
+  s.append(el("p","body-txt","On its own the robot can read files and run commands. That is all. A plug-in tool hands it something new — a web browser it can actually drive, a calendar, a search engine for a documentation site."));
+  s.append(el("div","vis",VIS.mcpPlug()));
+  s.append(el("p","small",`The grown-up name for these is <b>MCP servers</b>. You will hear it a lot. It means "a thing that gives the robot a new tool".`));
+}});
+
+add({ lv:12, kind:"idea", build: s => {
+  s.append(el("h3",null,"Tripwires"));
+  s.append(el("p","body-txt","A tripwire is a little command that runs <i>by itself</i> at a particular moment, without anyone asking. You set it once and forget it."));
+  s.append(el("div","vis",VIS.hookMoments()));
+  s.append(el("p","small",`The grown-up name is <b>hooks</b>, and they live in your settings file. There are around twenty-five moments you can hook into; these four are the ones people actually use.`));
+}});
+
+add({ lv:12, kind:"idea", build: s => {
+  s.append(el("h3",null,"A real one, on this actual computer"));
+  s.append(el("p","body-txt","This is not a made-up example. The computer this course was built on has a tripwire on the “finished” moment. Every time the robot stops, it quietly tells a little dashboard what it just did."));
+  s.append(el("div","vis",VIS.hookWire()));
+  s.append(el("p","body-txt","The simplest useful version is a noise. Put a tripwire on the finished moment and make it play a sound. Now you can go and do something else while the robot works, instead of sitting there watching it."));
+}});
+
+add({ lv:12, kind:"idea", build: s => {
+  s.append(el("h3",null,"When to reach for which"));
+  s.append(el("div","vis",`
+    <div class="cmp">
+      <div class="col good"><span class="lab">Use a plug-in tool</span>
+        <p class="why">When the robot needs an <b>ability</b> it does not have. "I want it to be able to click around a website."</p></div>
+      <div class="col good"><span class="lab">Use a tripwire</span>
+        <p class="why">When you want something to happen <b>automatically</b> at a moment. "Tell me when it's done." "Tidy the code after every change."</p></div>
+    </div>`));
+  s.append(el("div","note",`<span class="eyebrow">A word on cost</span><p>You may read that plug-in tools eat your backpack. That was true, and is much less true now — they are loaded when needed. The things that actually crowd your backpack today are too many switched-on skills and an overgrown notebook.</p>`));
+}});
+
+add({ lv:12, kind:"practice", challenge:{
+  goal:"Check how full the backpack is, so you can see what is taking up room. Type the command that shows you.",
+  accept:[/^\/context\b/i],
+  hints:["You met it in Level 2. One word, after a slash.","Type <code>/context</code> and press Enter."],
+  tip:"On a real machine this is where you would spot an overgrown notebook or fifty switched-on skills."
+}, build: s => {
+  s.append(el("h3",null,"Your turn"));
+  s.append(el("p","body-txt","Have a look at what is in the backpack."));
+}});
+
+add({ lv:12, kind:"recap", badge:12, build: s => {
+  s.append(el("h3",null,"Level 11 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>Plug-in tools give it new abilities.</b> <span>Grown-up name: MCP.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Tripwires fire by themselves.</b> <span>Grown-up name: hooks. Start with a noise when it finishes.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Ability versus automatic.</b> <span>That is how you tell which one you need.</span></span></div>
+    </div>`));
+}});
+
+/* ================= LEVEL 12 — SQUAD ================= */
+add({ lv:13, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">12</div><h2>The whole squad</h2>
+    <p class="lede">This level is look-don't-touch, and the reason is money.</p>`));
+}});
+
+add({ lv:13, kind:"idea", build: s => {
+  s.append(el("h3",null,"Beyond teammates: a squad"));
+  s.append(el("p","body-txt","A teammate from Level 10 goes off, does one errand, reports back, and is gone."));
+  s.append(el("p","body-txt","A <b>squad</b> is different. Several full robots run at once. Each keeps its own memory. They can talk to each other, and one of them acts as captain."));
+  s.append(el("p","body-txt","It is genuinely impressive. It is also switched off to begin with. Even the people who made it still call it an experiment. And it is expensive in a way that is easy to miss."));
+}});
+
+add({ lv:13, kind:"idea", build: s => {
+  s.append(el("h3",null,"Here is the price"));
+  s.append(el("div","vis",VIS.squadPrice()));
+  s.append(el("div","alarm",`<span class="eyebrow">Why this is a whole level</span><p>Nothing warns you. The robots do not slow down or ask "are you sure?". The bill simply arrives afterwards. Knowing this <i>before</i> you try it is the entire lesson.</p>`));
+}});
+
+add({ lv:13, kind:"idea", build: s => {
+  s.append(el("h3",null,"The good idea hiding inside it"));
+  s.append(el("p","body-txt","When several robots work on the same project at once, they trip over each other. Two of them edit the same file at the same moment, and you get a mess."));
+  s.append(el("p","body-txt","The fix is to give each robot its own lane, meaning its own private copy of the files. Then you join everything back together at the end."));
+  s.append(el("div","vis",VIS.lanes()));
+  s.append(el("p","small","The grown-up name is a <b>worktree</b>. Worth knowing, but only actually needed when two jobs would touch the same files. If one robot is doing the pictures and another is doing the words, you do not need this at all."));
+}});
+
+add({ lv:13, kind:"idea", build: s => {
+  s.append(el("h3",null,"So: do not turn this on"));
+  s.append(el("p","body-txt","Not because it is dangerous. Because it is the wrong tool for what you want to do right now. And finding that out costs about seven times more."));
+  s.append(el("p","body-txt","One robot, used well, with clear instructions and a proper check, beats a squad of them used badly. That has been true for every level of this course and it is still true here."));
+  s.append(el("div","note",`<span class="eyebrow">When you eventually do</span><p>You have to switch it on yourself, by adding a line to your settings file. That is deliberate. Nobody should turn this on by accident.</p><p>If you ever genuinely need it, you will know enough by then to look it up. There is no exam on this slide.</p>`));
+}});
+
+add({ lv:13, kind:"recap", badge:13, build: s => {
+  s.append(el("h3",null,"Level 12 done"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">✓</span><span><b>A squad is several full robots at once.</b> <span>Experimental, off by default.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>About seven times the cost.</b> <span>With no warning while it happens.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Lanes stop them colliding.</b> <span>Only needed when jobs overlap.</span></span></div>
+    </div>`));
+  s.append(el("p","small","No practice for this level on purpose. Some things you learn about without doing."));
+}});
+
+/* ================= LEVEL 13 — CAPSTONE ================= */
+add({ lv:14, kind:"opener", build: s => {
+  s.append(el("div","opener",`<div class="num">13</div><h2>Coach your own crew</h2>
+    <p class="lede">No new ideas in this level. Just you, doing all of it, for real.</p>`));
+}});
+
+add({ lv:14, kind:"idea", build: s => {
+  s.append(el("h3",null,"Pick something small and real"));
+  s.append(el("p","body-txt","Not a huge dream project. Something you could finish in an afternoon and would actually use or show someone."));
+  s.append(el("div","vis",`
+    <div class="tree">
+      <div class="row top"><span class="d">idea</span><b>a game you can play in a browser</b><span>bouncing ball, paddle, score</span></div>
+      <div class="row top"><span class="d">idea</span><b>a page about something you like</b><span>with pictures and a bit of writing</span></div>
+      <div class="row top"><span class="d">idea</span><b>a thing that tidies a messy folder</b><span>use the loop from Level 8</span></div>
+      <div class="row top"><span class="d">idea</span><b>a quiz that marks itself</b><span>good excuse to practice checking</span></div>
+    </div>`));
+}});
+
+add({ lv:14, kind:"idea", build: s => {
+  s.append(el("h3",null,"The whole course, as a checklist"));
+  s.append(el("p","body-txt","Every one of these is a level you have already done. Work down the list."));
+  s.append(el("div","vis",VIS.capstone()));
+}});
+
+add({ lv:14, kind:"idea", build: s => {
+  s.append(el("h3",null,"Then write your own superpower card"));
+  s.append(el("p","body-txt","By the end you will have said the same thing to the robot several times. That repeated thing is your first skill."));
+  s.append(el("p","body-txt",`Make a folder, put one <code class="ic">SKILL.md</code> in it, and write down the playbook — including the mistakes it kept making and must never make again.`));
+  s.append(cmdEl("where it goes", "~/.claude/skills/my-first-skill/SKILL.md"));
+  s.append(el("div","note",`<span class="eyebrow">A shortcut that is not cheating</span><p>Ask the robot to write the skill file for you. Then test it on a fresh conversation, see where it goes wrong, and fix the wording. That is exactly how experienced people do it.</p>`));
+}});
+
+add({ lv:14, kind:"recap", badge:14, build: s => {
+  s.append(el("h3",null,"You are the coach now"));
+  s.append(el("p","body-txt","You can install it and control what it touches. You can instruct it clearly, make it plan first, and make it prove its own work."));
+  s.append(el("p","body-txt","You can give it a memory, hand it superpowers, hire it a crew, and wire it to other things. You can build a loop that runs without you."));
+  s.append(el("p","body-txt","And you know which expensive door to leave shut."));
+  s.append(el("div","note",`<span class="eyebrow">The one thing to keep</span><p>If you forget every command in this course, keep this: give it a job, and give it a way to prove it did the job. Everything else is decoration.</p>`));
+}});
+
+/* ---- ACT IV RECAP ---- */
+addMission({
+  lv:19, tag:"Act IV", name:"Build the bench",
+  task:"Give your robot one new superpower, one teammate and one tripwire — then write the playbook down as a card of your own.",
+  steps:[
+    `<b>Find the thing you keep re-explaining.</b><span>That repeated thing is your first skill. Make a folder, write one <code class="ic">SKILL.md</code> in it (Level 9).</span>`,
+    `<b>Type <code class="ic">/agents</code> and look at your crew.</b><span>Send one off to do some reading — and tell it <i>why</i> you asked (Level 10).</span>`,
+    `<b>Set one tripwire.</b><span>A noise when it finishes is the simplest useful one. A plug-in tool gives an ability; a tripwire makes something happen by itself (Level 11).</span>`,
+    `<b>Look at the squad's price tag and walk away.</b><span>About seven times the cost, with no warning while it happens. Leave it and the fourth light alone, on purpose (Level 12).</span>`,
+    `<b>Fold everything into your skill file.</b><span>The playbook, plus the mistakes it must never make again.</span>`,
+    `<b>Test it in a brand-new conversation.</b><span>Not the one that wrote it — that one already knows, so it proves nothing (Level 13).</span>`
+  ],
+  done:"A real <code class=\"ic\">SKILL.md</code> exists in a real folder, and it worked correctly the first time it was used in a <i>fresh</i> conversation. That last part is the proof it is not just riding on the memory of the chat that made it.",
+  trap:"Installing a pile of skills and switching everything on, or reaching for the whole squad because it sounds powerful. Big toolbox, small number of tools carried.",
+  lead:"Check who is on your team.",
+  ch:{ goal:"List your teammates. Type the command from Level 10.", accept:[/^\/agents\b/i],
+       hints:["One word after a slash — the grown-up word for teammates.","Type <code>/agents</code> and press Enter."],
+       tip:"That is the last act finished." },
+  close:"You have a crew, a card you wrote yourself, and the judgement to leave the expensive door shut. That is the whole course."
+});
+
+/* ---- close ---- */
+add({ lv:15, kind:"end", build: s => {
+  s.append(el("div","cover",`${VIS.robot()}<h2>That is the <span class="em">whole course</span></h2>`));
+  s.append(el("p","lede","Fourteen levels, from never having opened a terminal to building a loop that runs without you."));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">1</span><span><b>Say what you want precisely.</b> <span>Levels 4 and 10 — vague in, wrong out, whether you are talking to the robot or about it.</span></span></div>
+      <div class="co"><span class="n">2</span><span><b>Control what it may do.</b> <span>Level 3 — the traffic lights, and the fourth one you left alone.</span></span></div>
+      <div class="co"><span class="n">3</span><span><b>Make it prove its own work.</b> <span>Levels 6 and 8 — the one habit that matters more than all the commands.</span></span></div>
+      <div class="co"><span class="n">4</span><span><b>Give it a memory.</b> <span>Levels 7 and 9 — a short notebook, and superpower cards for the rest.</span></span></div>
+      <div class="co"><span class="n">5</span><span><b>Know that thinking costs money.</b> <span>Levels 2, 11 and 12 — the backpack, and the door you left shut.</span></span></div>
+    </div>`));
+  s.append(el("div","note",`<span class="eyebrow">Where to go from here</span><p>Do the Level 13 project properly. Everything in this course is decoration until you have built one real thing with it — and the first time your robot catches its own mistake because you asked it to check, you will understand why Level 6 was the important one.</p>`));
+  s.append(el("p","small","Use the Sections menu at the top to jump back to any level. Your badges are saved on this device."));
+}});
+
+/* ---------- dugout ---------- */
+const MODES = [
+  { key:"red",    name:"Ask first",    chip:"ASK FIRST" },
+  { key:"yellow", name:"Accept edits", chip:"ACCEPT EDITS" },
+  { key:"green",  name:"Plan only",    chip:"PLAN ONLY" }
+];
+
+class Dugout {
+  constructor(ch, onSolve) {
+    this.ch = ch; this.onSolve = onSolve;
+    this.modeIdx = 0; this.pack = 6; this.history = []; this.hIdx = -1;
+    this.misses = 0; this.solved = false; this.verbose = false; this.lastEsc = 0;
+    this.root = this.build(); this.boot();
+  }
+  build() {
+    const r = el("div","dugout");
+    const top = el("div","dug-top");
+    top.append(el("span","lbl","Practice dugout"), el("span","fake","a drawing — nothing here is real"));
+    const pk = el("div","backpack",`<span class="bl">backpack</span><span class="bar"><i></i></span><span class="pct">6%</span>`);
+    top.append(pk); r.append(top);
+    this.bar = pk.querySelector(".bar"); this.fill = pk.querySelector("i"); this.pctEl = pk.querySelector(".pct");
+
+    this.goalEl = el("div","goal",`<span class="g">Goal</span><span class="gt">${this.ch.goal}</span>`);
+    r.append(this.goalEl);
+
+    this.screen = el("div","screen");
+    this.screen.setAttribute("role","log"); this.screen.tabIndex = 0;
+    r.append(this.screen);
+
+    const row = el("div","dug-input");
+    row.append(el("span","caret",">"));
+    this.input = el("input"); this.input.type = "text";
+    this.input.placeholder = "type here, then press Enter";
+    this.input.setAttribute("aria-label","Practice terminal input");
+    this.input.autocomplete = "off"; this.input.spellcheck = false;
+    row.append(this.input); r.append(row);
+
+    const foot = el("div","dug-foot");
+    this.chip = el("span","mode-chip red");
+    foot.append(this.chip, el("span","keyhint",`<kbd>Shift</kbd>+<kbd>Tab</kbd> light · <kbd>↑</kbd> history · <kbd>Esc</kbd><kbd>Esc</kbd> clear`));
+    r.append(foot);
+    this.paintMode();
+
+    this.input.addEventListener("keydown", e => this.key(e));
+    /* Shift+Tab cycles the light, but only while the input has focus, so the
+       transcript above can still be reverse-tabbed out of by keyboard. */
+    this.input.addEventListener("keydown", e => {
+      if (e.key === "Tab" && e.shiftKey) { e.preventDefault(); this.cycle(); }
+    });
+    return r;
+  }
+  boot() {
+    this.p("Claude Code (practice)  ·  folder: ~/my-first-project","sys");
+    this.p("Type /help to see what you can do. Nothing here touches your real computer.","sys");
+  }
+  p(t,c) { const e = el("p","ln"+(c?" "+c:""),t); this.screen.append(e); this.screen.scrollTop = 1e6; }
+  blk(ls,c) { const d = el("div","blk"); ls.forEach(l => d.append(el("p","ln"+(c?" "+c:""),l))); this.screen.append(d); this.screen.scrollTop = 1e6; }
+  paintMode() { const m = MODES[this.modeIdx]; this.chip.className = "mode-chip "+m.key; this.chip.innerHTML = `<span class="orb"></span>${m.chip}`; }
+  cycle() {
+    this.modeIdx = (this.modeIdx+1) % MODES.length;
+    const m = MODES[this.modeIdx];
+    this.paintMode(); this.p(`— light switched to <b>${m.name}</b> —`,"warn"); say("Light is now "+m.name);
+    if (this.modeIdx === 0) this.p("(the fourth light, with no asking at all, is locked in this course)","sys");
+    if (this.ch.mode && !this.solved && m.key === this.ch.mode) this.win();
+  }
+  addPack(n) { this.pack = Math.min(99, this.pack+n); this.paint(); }
+  paint() {
+    this.fill.style.width = this.pack+"%"; this.pctEl.textContent = this.pack+"%";
+    this.bar.className = "bar"+(this.pack>75?" hot":this.pack>45?" warn":"");
+  }
+  key(e) {
+    if (e.key === "Enter") { e.preventDefault(); const v = this.input.value; this.input.value = ""; this.run(v); return; }
+    if (e.key === "Escape") { const n = Date.now(); if (n-this.lastEsc < 700) { this.input.value = ""; this.p("— cleared —","sys"); } this.lastEsc = n; return; }
+    if (e.key === "ArrowUp") { e.preventDefault(); if (!this.history.length) return; this.hIdx = Math.min(this.hIdx+1, this.history.length-1); this.input.value = this.history[this.hIdx]; return; }
+    if (e.key === "ArrowDown") { e.preventDefault(); this.hIdx = Math.max(this.hIdx-1,-1); this.input.value = this.hIdx === -1 ? "" : this.history[this.hIdx]; return; }
+    if (e.key === "o" && e.ctrlKey) { e.preventDefault(); this.verbose = !this.verbose; this.p(`— thinking log ${this.verbose?"on":"off"} —`,"sys"); }
+  }
+  run(raw) {
+    const v = raw.trim(); if (!v) return;
+    this.history.unshift(v); this.hIdx = -1;
+    this.p(`<span class="u">&gt; ${esc(v)}</span>`); this.addPack(2);
+    this.respond(v);
+    if (this.ch.accept && !this.solved) {
+      if (this.ch.accept.some(rx => rx.test(v))) this.win(); else this.miss();
+    }
+  }
+  respond(v) {
+    const lo = v.toLowerCase();
+    if (v === "/" || lo === "/help") return this.blk([
+      "<b>Commands you can try in here</b>",
+      "  /help      show this list",
+      "  /context   see how full the backpack is",
+      "  /compact   squash the chat to make room",
+      "  /model     choose which brain to use",
+      "  /init      write the robot a notebook",
+      "  /agents    see your teammates",
+      "  /clear     start the chat over",
+      "  /login     sign in",
+      "  /exit      leave",
+      "",
+      "  @file.txt  point at a file",
+      "  !ls        run a plain computer command",
+      "<span class='sys'>Practice list. The real /help is much longer.</span>"]);
+    if (lo === "/login") return this.blk(["Opening your browser to sign in…","<span class='ok'>✓ Signed in as you@example.com  (pretend)</span>"]);
+    if (lo === "/context") return this.blk([
+      "<b>What is in the backpack right now</b>",
+      "  the robot's instructions ....... 12,400",
+      "  its built-in tools ............. 17,100",
+      "  the notebook (CLAUDE.md) ....... 0  <span class='sys'>← none yet, that is Level 7</span>",
+      `  this conversation .............. ${(this.pack*1200).toLocaleString()}`,
+      `  <span class='ok'>free space .................... ${100-this.pack}%</span>`]);
+    if (lo === "/compact") {
+      const b = this.pack; this.pack = Math.max(6, Math.round(this.pack*0.35)); this.paint();
+      return this.blk(["Squashing the chat into a shorter summary…",
+        `<span class='ok'>✓ backpack went from ${b}% to ${this.pack}%</span>`,
+        "<span class='sys'>It keeps the gist and forgets the exact words.</span>"]);
+    }
+    if (lo.startsWith("/model")) return this.blk([
+      "<b>Which brain?</b>",
+      "  1. Opus    — the big careful one. Costs the most.",
+      "  2. Sonnet  — the everyday one. Most people live here.",
+      "  3. Haiku   — the quick cheap one. Good for small jobs.",
+      "<span class='sys'>Level 10 covers when to pick which.</span>"]);
+    if (lo === "/init") return this.blk(["Reading every file in this folder…","<span class='ok'>✓ Wrote CLAUDE.md</span>",
+      "<span class='sys'>That file is the notebook. It gets read every single time the robot starts. Level 7.</span>"]);
+    if (lo === "/agents") return this.blk(["<b>Your teammates</b>","  (none yet)",
+      "<span class='sys'>In Level 10 you hire three: a researcher, a reviewer and a tester.</span>"]);
+    if (lo.startsWith("/goal")) {
+      const rest = v.slice(5).trim();
+      if (!rest) return this.blk(["<b>/goal</b> — keep going until a condition is met.",
+        "<span class='sys'>Give it three things: a finish line (“until…”), a way to prove it, and a guardrail (“stop after N turns”).</span>",
+        "<span class='sys'>Try: /goal tidy the folder until no files are left, stop after 20 turns</span>"]);
+      const hasUntil = /until/i.test(rest), hasStop = /stop after/i.test(rest);
+      const out = ["<span class='sys'>starting a loop…</span>",
+        "turn 1  looked around, found 17 things to do",
+        "turn 2  did 6 of them … 11 left",
+        "turn 3  did 7 of them … 4 left",
+        "turn 4  did 4 of them … 0 left"];
+      if (hasUntil) out.push("<span class='am'>turn 5  checking the finish line… nothing left</span>",
+        "<span class='ok'>✓ goal achieved</span>");
+      else out.push("<span class='err'>…and it keeps going, because you never said when to stop.</span>",
+        "<span class='sys'>Add a finish line: “…until there are none left”.</span>");
+      if (hasStop) out.push("<span class='sys'>(guardrail noted — it would have given up rather than loop forever)</span>");
+      else out.push("<span class='warn'>⚠ no give-up number. Always add “stop after N turns”.</span>");
+      this.addPack(6);
+      return this.blk(out);
+    }
+    if (lo.startsWith("/rewind")) return this.blk(["Going back to before the last mistake…",
+      "<span class='ok'>✓ rewound. The bad turn is gone from the chat.</span>",
+      "<span class='sys'>Much better than arguing — the bad ideas are not left lying around.</span>"]);
+    if (lo.startsWith("/plugin")) {
+      const arg = v.slice(7).trim();
+      if (/^marketplace\s+add\s+\S/i.test(arg)) {
+        const shop = arg.replace(/^marketplace\s+add\s+/i, "");
+        return this.blk([`Adding marketplace <b>${esc(shop)}</b>…`,
+          "<span class='ok'>✓ shop added</span>",
+          `<span class='sys'>Now install something from it: /plugin install &lt;name&gt;@&lt;shop&gt;</span>`]);
+      }
+      if (/^install\s+\S/i.test(arg)) return this.blk([`Installing <b>${esc(arg.replace(/^install\s+/i,""))}</b>…`,
+        "<span class='ok'>✓ installed — its commands are available now</span>",
+        "<span class='sys'>Its skills load only when they are needed.</span>"]);
+      if (/^list/i.test(arg)) return this.blk(["<b>Installed plugins</b>","  watch-skill@watch-skill   <span class='gr'>enabled</span>",
+        "<span class='sys'>Real machines often have far more. That is the problem Level 9 warns about.</span>"]);
+      return this.blk(["<b>/plugin</b> — manage superpower packs.",
+        "  /plugin marketplace add &lt;owner&gt;/&lt;repo&gt;","  /plugin install &lt;name&gt;@&lt;shop&gt;",
+        "  /plugin list","  /plugin uninstall &lt;name&gt;@&lt;shop&gt;"]);
+    }
+    if (lo === "/clear") { this.screen.innerHTML = ""; this.pack = 6; this.paint(); this.boot();
+      return this.p("<span class='ok'>✓ Fresh start. The robot has forgotten this chat.</span>"); }
+    if (lo === "/exit" || lo === "/quit") return this.blk(["Goodbye.",
+      "<span class='sys'>In the real thing you would be back at your plain terminal — and it would remember nothing next time. That is what the notebook in Level 7 fixes.</span>"]);
+    if (v.startsWith("/")) return this.blk([`<span class='err'>Unknown command: ${esc(v)}</span>`,"<span class='sys'>Type / on its own to see the list.</span>"]);
+    if (v.startsWith("!")) return this.blk(["<span class='sys'>running a plain computer command (pretend)</span>",
+      "hello.txt   notes.md   my-game/","<span class='sys'>! means: skip the robot, talk straight to the computer.</span>"]);
+    if (v.startsWith("@")) return this.blk([`<span class='sys'>pointing the robot at ${esc(v.slice(1)||"a file")}</span>`,"<span class='ok'>✓ It can see that file now.</span>"]);
+
+    if (this.verbose) this.p("<span class='sys'>(thinking… deciding whether this needs a file change)</span>");
+    const m = MODES[this.modeIdx];
+    if (m.key === "green") return this.blk([
+      "I will not change anything yet — the light is on <b>Plan only</b>. Here is what I would do:",
+      "  1. make the file","  2. put your words in it","  3. show you the result so you can check it",
+      "<span class='sys'>Switch the light to carry it out.</span>"]);
+    if (m.key === "red") return this.blk(["Okay. To do that I need to create <b>hello.txt</b>.",
+      "<span class='warn'>May I? [y / n]</span>",
+      "<span class='sys'>The light is on Ask first, so I stop and check with you.</span>"]);
+    return this.blk(["Okay — working…","<span class='ok'>✓ Done.</span>",
+      "<span class='sys'>The light is on Accept edits, so I got on with it. Now <b>you</b> check my work.</span>"]);
+  }
+  win() {
+    this.solved = true;
+    this.goalEl.querySelector(".g").textContent = "Done";
+    this.goalEl.querySelector(".gt").innerHTML =
+      "<b>Nice — that is exactly it.</b> " + (this.ch.tip ? this.ch.tip + " " : "") + "Keep playing as long as you like, then press Next.";
+    this.p("<span class='ok'>★ challenge complete</span>"); say("Challenge complete");
+    this.onSolve();
+  }
+  miss() {
+    if (!this.ch.hints) return;
+    this.misses++; if (this.misses < 2) return;
+    let h = this.goalEl.querySelector(".hint");
+    if (!h) { h = el("span","hint"); this.goalEl.querySelector(".gt").append(h); }
+    h.innerHTML = "Hint: " + this.ch.hints[Math.min(this.misses-2, this.ch.hints.length-1)];
+    say("Hint shown");
+  }
+}
+
+/* ---------- state ---------- */
+const KEY = "cc-academy-deck-v1";
+let st = { i:0, badges:[], solved:[] };
+try {
+  const r = localStorage.getItem(KEY);
+  if (r) {
+    const p = JSON.parse(r);
+    st = {
+      i: Number.isInteger(p.i) ? p.i : 0,
+      badges: Array.isArray(p.badges) ? p.badges.filter(Number.isInteger) : [],
+      solved: Array.isArray(p.solved) ? p.solved.filter(Number.isInteger) : []
+    };
+  }
+} catch (e) { /* corrupt or unavailable storage — start fresh rather than break */ }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+
+/* ---------- render ---------- */
+function draw() {
+  const i = Math.max(0, Math.min(st.i, S.length-1));
+  st.i = i; save();
+  const sl = S[i];
+  const host = document.getElementById("slide");
+  host.innerHTML = "";
+  host.className = "";
+  void host.offsetWidth;      /* force a reflow so the entrance animation replays */
+  host.className = "slide";
+
+  sl.build(host);
+
+  if (sl.kind === "practice") {
+    const d = new Dugout(sl.ch || sl.challenge, () => {
+      if (!st.solved.includes(i)) { st.solved.push(i); save(); }
+    });
+    if (sl.challenge && st.solved.includes(i)) { /* re-entry: leave fresh, it is practice */ }
+    host.append(d.root);
+    setTimeout(() => d.input.focus(), 60);
+  }
+
+  if (sl.kind === "recap" || sl.kind === "end") {
+    const b = BADGES.find(x => x.lv === sl.badge);
+    if (b) {
+      /* a badge is earned by doing the practice, not by reaching this slide */
+      const sec = SECTIONS.find(x => x.lv === sl.lv);
+      const practices = sec ? sec.idx.filter(k => S[k].kind === "practice") : [];
+      const earned = practices.length === 0 || practices.every(k => st.solved.includes(k));
+      if (earned) {
+        if (!st.badges.includes(b.lv)) { st.badges.push(b.lv); save(); }
+        host.append(el("div","stamp pop",`★ Badge earned — ${b.name}`));
+      } else {
+        host.append(el("div","note",
+          `<span class="eyebrow">One thing left</span><p>Go back a slide and finish the practice, and “${b.name}” is yours. You can carry on without it if you would rather — nothing is locked.</p>`));
+      }
+    }
+    const list = el("div","badge-list");
+    BADGES.forEach(x => list.append(el("span","bpill"+(st.badges.includes(x.lv)?" got":""),
+      (st.badges.includes(x.lv)?"★ ":"○ ")+x.name)));
+    host.append(list);
+  }
+
+  /* rail */
+  document.getElementById("chipLevel").textContent = LV[sl.lv];
+  document.getElementById("chipCount").textContent = `${i+1} / ${S.length}`;
+  document.getElementById("chipBadges").textContent = st.badges.length ? "★".repeat(st.badges.length) : "";
+  document.getElementById("railFill").style.width = ((i+1)/S.length*100)+"%";
+  renderTabs();
+
+  const dots = document.getElementById("dots");
+  dots.innerHTML = "";
+  S.forEach((_, k) => dots.append(el("span","dot"+(k===i?" on":k<i?" seen":""))));
+
+  document.getElementById("backBtn").disabled = i === 0;
+  const nb = document.getElementById("nextBtn");
+  nb.textContent = i === S.length-1 ? "Start again" : "Next →";
+
+  window.scrollTo({ top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  say(`Slide ${i+1} of ${S.length}. ${LV[sl.lv]}`);
+}
+
+const go = n => { st.i = n < 0 ? 0 : n >= S.length ? 0 : n; draw(); };
+document.getElementById("nextBtn").onclick = () => go(st.i+1);
+document.getElementById("backBtn").onclick = () => go(st.i-1);
+
+/* ==========================================================
+   LEVEL TABS — one button per level, in reading order.
+   `lv` values are label lookups, so the four act recaps sit
+   at the end of LV but appear here in their true reading order.
+   The acts still shape the order and the recaps, but they are
+   not labelled here: the strip is just the numbers.
+   ========================================================== */
+const TAB_ORDER = [
+  { lv:0,  label:"W",  name:"Welcome" },
+  { lv:1,  label:"0" }, { lv:2,  label:"1" }, { lv:3,  label:"2" },
+  { lv:16, label:"Recap", rc:true },
+  { lv:4,  label:"3" }, { lv:5,  label:"4" }, { lv:6,  label:"5" },
+  { lv:7,  label:"6" }, { lv:8,  label:"7" },
+  { lv:17, label:"Recap", rc:true },
+  { lv:9,  label:"8" },
+  { lv:18, label:"Recap", rc:true },
+  { lv:10, label:"9" }, { lv:11, label:"10" }, { lv:12, label:"11" },
+  { lv:13, label:"12" }, { lv:14, label:"13" },
+  { lv:19, label:"Recap", rc:true },
+  { lv:15, label:"★", name:"What's next" }
+];
+
+function renderTabs() {
+  const host = document.getElementById("tabs");
+  host.innerHTML = "";
+  const curLv = S[st.i].lv;
+
+  TAB_ORDER.forEach(t => {
+    const sec = SECTIONS.find(x => x.lv === t.lv);
+    if (!sec) return;
+    const badge = BADGES.find(x => x.lv === t.lv);
+    const got = badge && st.badges.includes(badge.lv);
+    const on = t.lv === curLv;
+
+    const b = el("button", "tab" + (on ? " on" : "") + (got ? " got" : "") + (t.rc ? " rc" : ""));
+    b.type = "button";
+    b.innerHTML = esc(t.label) + (got && !t.rc ? `<span class="st">★</span>` : "");
+    b.title = LV[t.lv];
+    b.setAttribute("aria-label", LV[t.lv] + (got ? " — badge earned" : ""));
+    if (on) b.setAttribute("aria-current", "true");
+    b.onclick = () => go(sec.idx[0]);
+    host.append(b);
+  });
+
+  const active = host.querySelector(".tab.on");
+  if (active && active.scrollIntoView) active.scrollIntoView({ block:"nearest", inline:"center" });
+}
+
+const scrim = document.getElementById("scrim");
+const sheet = document.getElementById("sheet");
+const menuBtn = document.getElementById("menuBtn");
+
+document.addEventListener("keydown", e => {
+  const a = document.activeElement;
+  if (/^(INPUT|TEXTAREA)$/.test(a.tagName)) return;
+  if (a.closest && a.closest(".dugout")) return;   /* let the terminal scroll with Space */
+  if (e.key === "Escape" && scrim.classList.contains("open")) { closeMenu(); return; }
+  if (scrim.classList.contains("open")) return;
+  if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); go(st.i+1); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); go(st.i-1); }
+});
+
+/* ==========================================================
+   SECTIONS MENU
+   Slide titles are read out of each slide's own heading, so
+   the menu can never drift out of step with the content.
+   ========================================================== */
+const TITLES = S.map((sl, k) => {
+  const probe = document.createElement("div");
+  try { sl.build(probe); } catch (e) { /* ignore, fall back to level name */ }
+  const h = probe.querySelector("h2, h3");
+  let t = h ? h.textContent.trim() : "";
+  if (!t) t = LV[sl.lv];
+  if (sl.kind === "practice") t = "Your turn";
+  return t;
+});
+
+/* group slide indices by section, preserving order */
+const SECTIONS = [];
+S.forEach((sl, k) => {
+  const last = SECTIONS[SECTIONS.length-1];
+  if (last && last.lv === sl.lv) last.idx.push(k);
+  else SECTIONS.push({ lv: sl.lv, idx: [k] });
+});
+
+function buildMenu() {
+  const host = document.getElementById("secList");
+  host.innerHTML = "";
+  const curLv = S[st.i].lv;
+
+  SECTIONS.forEach(sec => {
+    const wrap = el("div", "sec" + (sec.lv === curLv ? " on" : ""));
+    const badge = BADGES.find(b => b.lv === sec.lv);
+    const got = badge && st.badges.includes(badge.lv);
+    const isHere = sec.lv === curLv;
+
+    const b = el("button", "sec-btn");
+    b.type = "button";
+    b.setAttribute("aria-expanded", isHere ? "true" : "false");
+    b.innerHTML =
+      `<span class="mark${got ? " got" : ""}${isHere ? " here" : ""}">${got ? "★" : sec.idx.length}</span>` +
+      `<span class="nm">${LV[sec.lv]}</span>` +
+      `<span class="ct">${sec.idx.length} slide${sec.idx.length === 1 ? "" : "s"}</span>`;
+    b.onclick = () => { closeMenu(); go(sec.idx[0]); };
+    wrap.append(b);
+
+    /* the current section shows its slides so you can jump inside it */
+    if (isHere) {
+      const ul = el("ul", "subs");
+      sec.idx.forEach(k => {
+        const li = el("li");
+        const sb = el("button", "sub-btn" + (k === st.i ? " on" : ""));
+        sb.type = "button";
+        sb.innerHTML =
+          `<span class="sn">${k+1}</span>` +
+          `<span>${TITLES[k]}</span>` +
+          (S[k].kind === "practice" ? `<span class="tk" aria-hidden="true">⌨</span>` : "");
+        sb.onclick = () => { closeMenu(); go(k); };
+        li.append(sb);
+        ul.append(li);
+      });
+      wrap.append(ul);
+    }
+    host.append(wrap);
+  });
+}
+
+/* --- focus containment for the modal sheet --- */
+const FOCUSABLE = 'button:not([disabled]), a[href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+const bgRegions = () => ["h1.sr", ".rail", ".stage", ".nav"]
+  .map(sel => document.querySelector(sel)).filter(Boolean);
+
+function setBackgroundInert(on) {
+  bgRegions().forEach(e => {
+    if (on) { e.setAttribute("inert", ""); e.setAttribute("aria-hidden", "true"); }
+    else { e.removeAttribute("inert"); e.removeAttribute("aria-hidden"); }
+  });
+}
+
+/* wrap Tab at the ends, for browsers without `inert` */
+sheet.addEventListener("keydown", e => {
+  if (e.key !== "Tab") return;
+  const f = Array.from(sheet.querySelectorAll(FOCUSABLE)).filter(x => x.offsetParent !== null);
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+function openMenu() {
+  buildMenu();
+  scrim.classList.add("open");
+  menuBtn.setAttribute("aria-expanded", "true");
+  setBackgroundInert(true);
+  const first = sheet.querySelector(".sec.on .sub-btn.on") || sheet.querySelector(".sec-btn");
+  if (first) first.focus();
+  say("Sections menu open");
+}
+function closeMenu() {
+  scrim.classList.remove("open");
+  menuBtn.setAttribute("aria-expanded", "false");
+  setBackgroundInert(false);   /* must come before focus — the button lives in the background */
+  menuBtn.focus();
+}
+menuBtn.onclick = openMenu;
+document.getElementById("closeMenu").onclick = closeMenu;
+scrim.addEventListener("click", e => { if (e.target === scrim) closeMenu(); });
+
+document.getElementById("resetBtn").onclick = () => {
+  st = { i:0, badges:[], solved:[] };
+  save(); closeMenu(); draw();
+  say("Progress reset");
+};
+
+draw();
+</script>
