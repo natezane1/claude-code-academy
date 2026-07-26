@@ -1448,7 +1448,7 @@ add({ lv:4, kind:"idea", build: s => {
 }});
 
 add({ lv:4, kind:"idea", build: s => {
-  s.append(el("h3",null,"Light 3 — thinking, not touching"));
+  s.append(el("h3",null,"Light 3 — reading, not touching"));
   s.append(el("div","vis",VIS.lightGreen()));
   s.append(el("p","body-txt","This one becomes your favorite later on. Asking the robot to plan before it builds is a whole level of its own further along."));
 }});
@@ -1490,7 +1490,7 @@ add({ lv:4, kind:"recap", badge:4, build: s => {
   s.append(el("div","vis",`
     <div class="callouts">
       <div class="co"><span class="n">✓</span><span><b><kbd>Shift</kbd>+<kbd>Tab</kbd> switches the light.</b> <span>Check the chip before every instruction.</span></span></div>
-      <div class="co"><span class="n">✓</span><span><b>Red to learn, yellow to work, green to think.</b> <span>Fourth light left alone.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Red to learn, yellow to work, green to plan.</b> <span>Fourth light left alone.</span></span></div>
       <div class="co"><span class="n">✓</span><span><b>Small playground beats no brakes.</b> <span>Sandbox and an allowed list, if someone sets it up.</span></span></div>
     </div>`));
 }});
@@ -1579,6 +1579,20 @@ add({ lv:6, kind:"idea", build: s => {
   s.append(el("div","note",`<span class="eyebrow">Sneaky side effect</span><p>By answering its questions you end up understanding your own project properly — without reading a single line of code.</p>`));
 }});
 
+add({ lv:6, kind:"idea", build: s => {
+  s.append(el("h3",null,"And you can ask it to think harder"));
+  s.append(el("p","body-txt","A plan is only as good as the thinking behind it. You can turn that thinking up — there is no setting to find, you just say so in the instruction."));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">1</span><span><b>think</b> <span>A little longer than usual. Enough for most plans.</span></span></div>
+      <div class="co"><span class="n">2</span><span><b>think hard</b> <span>For when the first plan came back shallow.</span></span></div>
+      <div class="co"><span class="n">3</span><span><b>think harder</b> <span>For a problem with real trade-offs in it.</span></span></div>
+      <div class="co"><span class="n">4</span><span><b>ultrathink</b> <span>The top of the dial. Rare, and you should feel a reason for it.</span></span></div>
+    </div>`));
+  s.append(el("p","body-txt",`You put the words in the instruction like anything else: <code class="ic">think hard about how the scoreboard should work, then plan it</code>.`));
+  s.append(el("div","note",`<span class="eyebrow">Not the same thing as the green light</span><p>These get mixed up constantly, so: the green light decides what the robot is <i>allowed to do</i> — plan, don't touch. Thinking decides <i>how hard it reasons</i> before it answers you. Two different dials. You can ultrathink on any of the three lights, and you can sit on the green light while it barely thinks at all.</p>`));
+  s.append(el("p","small",`Every step up the dial costs you waiting time and fills the backpack faster, so save the top of it for problems that are genuinely hard or genuinely unclear — not for "rename this file". <span class="word">grown-up word: extended thinking</span>`));
+}});
 add({ lv:6, kind:"idea", build: s => {
   s.append(el("h3",null,"Read the plan. Actually read it."));
   s.append(el("p","body-txt","This is the one step everybody skips. The plan is where you catch the misunderstanding, and it costs you thirty seconds."));
@@ -1712,6 +1726,13 @@ add({ lv:8, kind:"idea", build: s => {
   s.append(el("div","note",`<span class="eyebrow">And prune it</span><p>Every few weeks, read it and delete anything the robot no longer gets wrong. Notebooks rot, exactly like a messy bedroom.</p>`));
 }});
 
+add({ lv:8, kind:"idea", build: s => {
+  s.append(el("h3",null,"Writing that line down takes ten seconds"));
+  s.append(el("p","body-txt",`You do not have to go and open the notebook. Start a line with <code class="ic">#</code>, type the rule as a plain sentence, press Enter — and the robot writes it into its own notebook for you.`));
+  s.append(cmdEl("straight into the chat box", "# never delete a file without asking me first"));
+  s.append(el("p","body-txt","It will ask you which notebook to put it in: the one for everything you ever do, or the one for this project only. Choose the project one unless the rule is really about you rather than the work."));
+  s.append(el("p","small",`That is a fourth character worth knowing, alongside the <code class="ic">/</code>, <code class="ic">@</code> and <code class="ic">!</code> from Level 2. It is the one that makes the rule above happen — in the moment you are annoyed, which is the only moment you will remember to do it.`));
+}});
 add({ lv:8, kind:"practice", challenge:{
   goal:"Give the robot a notebook for this folder. Type the command that reads the project and writes CLAUDE.md.",
   accept:[/^\/init\b/i],
@@ -1893,6 +1914,21 @@ add({ lv:10, kind:"idea", build: s => {
 }});
 
 add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"And one you pull yourself"));
+  s.append(el("p","body-txt","Every card so far works the same way: the robot reads the descriptions, decides one is relevant, and picks it up on its own. You never asked for it."));
+  s.append(el("p","body-txt","A <b>command</b> is the opposite. It sits there doing nothing until <i>you</i> type its name. In Level 1 you learned that anything beginning with a slash is a command for the app itself. This is you adding your own to that menu."));
+  s.append(el("p","body-txt",`It is a plain text file — the same kind as <code class="ic">CLAUDE.md</code> and <code class="ic">SKILL.md</code> — dropped in a folder called <code class="ic">commands</code>. The file's name becomes the command's name. No installer, no shop. That is the whole thing.`));
+  s.append(el("div","vis",`
+    <div class="tree">
+      <div class="row top"><span class="d">~/.claude/commands/</span><b>standup.md</b><span>you type <code class="ic">/standup</code></span></div>
+      <div class="row"><span class="d">└─</span><b>explain.md</b><span>you type <code class="ic">/explain</code></span></div>
+    </div>`));
+  s.append(el("p","body-txt",`Write <code class="ic">$ARGUMENTS</code> in the file and you can hand it something as you go. Whatever you type after the command's name lands in that spot.`));
+  s.append(cmdEl("all that is inside explain.md", "Explain $ARGUMENTS to me as if I have never seen it before. Short sentences."));
+  s.append(cmdEl("then, inside Claude Code", "/explain the settings file"));
+  s.append(el("p","small","Restart Claude Code after making one. A new command does not show up in the slash menu until you do, and that trips up almost everybody the first time."));
+}});
+add({ lv:10, kind:"idea", build: s => {
   s.append(el("h3",null,"And now the twist"));
   s.append(el("p","body-txt","Here is what is actually installed on the computer this course was built on — and what is actually switched on."));
   s.append(el("div","vis",VIS.skillsOnOff()));
@@ -1909,6 +1945,15 @@ add({ lv:10, kind:"idea", build: s => {
   s.append(el("div","alarm",`<span class="eyebrow">Honest footnote</span><p>Switching a skill off stops it being used. But right now it does not always hide the skill completely. A bit of it can still be read at the start.</p><p>So the real defense is simpler. Do not install skills you do not need yet.</p>`));
 }});
 
+add({ lv:10, kind:"idea", build: s => {
+  s.append(el("h3",null,"Telling a card what it may not touch"));
+  s.append(el("p","body-txt","Switching a card off is the blunt version — the card either runs or it does not. There is a finer setting underneath it: a card can be told exactly which abilities it is allowed to reach for."));
+  s.append(el("p","body-txt",`Reading a file, changing a file, running a command — the grown-up word for those is <b>tools</b>. You list the ones this card may use, in the same place between the dashes as its name and description.`));
+  s.append(cmdEl("in SKILL.md, between the dashes", "allowed-tools: Read, Grep, Glob"));
+  s.append(el("p","body-txt","Those three all only look: open a file, search inside files, find files by name. Not one of them can change anything. So a card whose job is to check your work now genuinely cannot edit it — not by accident, and not because you asked it to in a hurry."));
+  s.append(el("div","note",`<span class="eyebrow">Same idea as Level 3, one size smaller</span><p>The traffic lights say what the robot may do <i>right now</i>, and you can flip them back with two keys. This line says what one particular card may <i>ever</i> do. It is written into the card, so it travels with the folder — onto every computer that card is ever copied to.</p>`));
+  s.append(el("p","small","Leave it out and the card may use everything you may. Worth adding the moment a card's job is to look rather than to build."));
+}});
 add({ lv:10, kind:"practice", challenge:{
   goal:"Have a look at what a plugin install looks like. Type the command that adds a marketplace — the shop — using oxbshw/watch-skill.",
   accept:[/^\/plugin\s+marketplace\s+add\s+\S+/i],
@@ -1924,7 +1969,8 @@ add({ lv:10, kind:"recap", badge:10, build: s => {
   s.append(el("div","vis",`
     <div class="callouts">
       <div class="co"><span class="n">✓</span><span><b>A skill is a folder with a SKILL.md.</b> <span>Cheaper than the notebook, because it only loads when needed.</span></span></div>
-      <div class="co"><span class="n">✓</span><span><b>Two ways in, for now.</b> <span>A marketplace, or a folder copied from the internet. Two heavier ones are waiting in “Going further”, once you have finished.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Three ways in, for now.</b> <span>A marketplace, a folder copied from the internet, or a file you wrote yourself. Two heavier ones are waiting in “Going further”, once you have finished.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>A skill is reached for; a command is typed.</b> <span>And a card can be told which tools it may use at all.</span></div>
       <div class="co"><span class="n">✓</span><span><b>Switching off matters as much as installing.</b> <span>Big toolbox, small number of tools carried.</span></span></div>
     </div>`));
 }});
@@ -1946,7 +1992,7 @@ add({ lv:11, kind:"idea", build: s => {
   s.append(el("h3",null,"Three worth hiring"));
   s.append(el("p","body-txt","You can invent any teammate you like, but almost everyone ends up with these three."));
   s.append(el("div","vis",VIS.crewThree()));
-  s.append(el("p","small",`Have a look at yours with <code class="ic">/agents</code>. Each one is a small file in <code class="ic">~/.claude/agents/</code> saying what it is for, which tools it may use, and which brain it should use.`));
+  s.append(el("p","small",`Have a look at yours with <code class="ic">/agents</code>. Each one is a small file in <code class="ic">~/.claude/agents/</code> saying what it is for, which tools it may use, and which brain it should use — the same <code class="ic">allowed-tools</code> fencing you put on a card in Level 9, now applied to a whole teammate. A checker with no ability to edit is the one that matters.`));
 }});
 
 add({ lv:11, kind:"idea", build: s => {
