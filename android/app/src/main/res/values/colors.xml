@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Taken from the course's own CSS tokens so the native window and the deck
+     inside it are literally the same colour. Any mismatch shows as a seam
+     during launch, before the WebView has painted. -->
+<resources>
+    <!-- Names match the CSS custom properties they mirror, minus the leading
+         dashes: a literal "- -" pair is illegal inside an XML comment. -->
+    <color name="paper">#0f1513</color>       <!-- css: paper  · page background -->
+    <color name="accent">#4fbf95</color>      <!-- css: accent · the green       -->
+    <color name="icon_bg">#171f1c</color>     <!-- css: card   · behind the robot -->
+</resources>

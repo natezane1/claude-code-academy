@@ -14,3 +14,39 @@ win/*.exe
 
 linux/claude-code-academy
 linux/icon.png
+
+# ---------------------------------------------------------------- phone apps
+#   bash build-mobile.sh   -> android/.../course.html, ios/.../course.html
+#   bash build-icons.sh    -> android mipmaps, ios appiconset PNGs
+# The generated course is deliberately NOT tracked in either app: it is a copy
+# of index.html, and a tracked copy is a copy that goes stale in a diff.
+android/app/src/main/assets/course.html
+ios/ClaudeCodeAcademy/Resources/course.html
+# Only the rendered PNGs. mipmap-anydpi-v26/*.xml is hand-written source that
+# defines the adaptive icon, and ignoring the whole mipmap-* tree would drop it.
+android/app/src/main/res/mipmap-*/*.png
+ios/ClaudeCodeAcademy/Assets.xcassets/AppIcon.appiconset/*.png
+
+# Gradle / Android Studio
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/.idea/
+android/*.iml
+# gradle/wrapper/gradle-wrapper.jar is deliberately NOT ignored. It is what
+# makes ./gradlew work on a fresh clone; ignoring it is a common mistake that
+# turns "clone and build" into "install the right Gradle first".
+
+# Signing material must never be committed. app/build.gradle.kts reads the
+# keystore path from ACADEMY_KEYSTORE at build time for exactly this reason.
+*.keystore
+*.jks
+key.properties
+
+# Xcode
+ios/build/
+ios/DerivedData/
+ios/*.xcworkspace/xcuserdata/
+ios/**/xcuserdata/
+ios/**/*.xcuserstate

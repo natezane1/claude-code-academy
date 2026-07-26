@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Used on Android 12 and above (android:dataExtractionRules).
+
+  Same intent as backup_rules.xml, split the way the newer API wants it:
+
+    cloud-backup    — restoring onto a new phone from a Google backup
+    device-transfer — the cable/Wi-Fi transfer during phone setup
+
+  Both carry the reader's place in the course across. Neither carries anything
+  else, because the app holds nothing else.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="file" path="app_webview/Local Storage/" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="file" path="app_webview/Local Storage/" />
+    </device-transfer>
+</data-extraction-rules>

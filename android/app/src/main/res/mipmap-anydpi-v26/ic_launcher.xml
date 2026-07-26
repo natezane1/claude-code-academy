@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Adaptive icon, API 26+. The launcher masks this into whatever shape the
+  device uses (circle, squircle, teardrop), which is why the robot is drawn
+  into the middle 66% of the foreground by build-icons.sh — anything outside
+  that safe zone can be cropped away on some launchers.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/icon_bg" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+</adaptive-icon>

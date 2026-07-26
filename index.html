@@ -1430,8 +1430,8 @@ add({ lv:4, kind:"idea", build: s => {
 }});
 
 add({ lv:4, kind:"idea", build: s => {
-  s.append(el("h3",null,"There are three answers, not two"));
-  s.append(el("p","body-txt","When it asks, you get three choices, not just yes and no."));
+  s.append(el("h3",null,"What those three answers actually do"));
+  s.append(el("p","body-txt","You just saw three choices on that prompt. Only the first one is obvious, and the one that matters most is not the one people press."));
   s.append(el("div","vis",`
     <div class="callouts">
       <div class="co"><span class="n">1</span><span><b>Yes.</b> <span>Go ahead, just this once.</span></span></div>
@@ -1581,17 +1581,12 @@ add({ lv:6, kind:"idea", build: s => {
 
 add({ lv:6, kind:"idea", build: s => {
   s.append(el("h3",null,"And you can ask it to think harder"));
-  s.append(el("p","body-txt","A plan is only as good as the thinking behind it. You can turn that thinking up — there is no setting to find, you just say so in the instruction."));
-  s.append(el("div","vis",`
-    <div class="callouts">
-      <div class="co"><span class="n">1</span><span><b>think</b> <span>A little longer than usual. Enough for most plans.</span></span></div>
-      <div class="co"><span class="n">2</span><span><b>think hard</b> <span>For when the first plan came back shallow.</span></span></div>
-      <div class="co"><span class="n">3</span><span><b>think harder</b> <span>For a problem with real trade-offs in it.</span></span></div>
-      <div class="co"><span class="n">4</span><span><b>ultrathink</b> <span>The top of the dial. Rare, and you should feel a reason for it.</span></span></div>
-    </div>`));
-  s.append(el("p","body-txt",`You put the words in the instruction like anything else: <code class="ic">think hard about how the scoreboard should work, then plan it</code>.`));
+  s.append(el("p","body-txt","A plan is only as good as the thinking behind it. The good news is that the thinking is already switched on — it reasons things through before it answers you, every time, without being asked."));
+  s.append(el("p","body-txt",`What you get on top of that is one word. Put <code class="ic">ultrathink</code> anywhere in the instruction and it will reason for considerably longer before it replies to that one message.`));
+  s.append(cmdEl("in the chat box, like any other instruction", "ultrathink about how the scoreboard should work, then plan it"));
+  s.append(el("p","body-txt","It is one word, not a dial with settings. Other spellings people pass around — <i>think hard</i>, <i>think harder</i> — read as ordinary English and do nothing special, so do not go hunting for a ladder of them."));
   s.append(el("div","note",`<span class="eyebrow">Not the same thing as the green light</span><p>These get mixed up constantly, so: the green light decides what the robot is <i>allowed to do</i> — plan, don't touch. Thinking decides <i>how hard it reasons</i> before it answers you. Two different dials. You can ultrathink on any of the three lights, and you can sit on the green light while it barely thinks at all.</p>`));
-  s.append(el("p","small",`Every step up the dial costs you waiting time and fills the backpack faster, so save the top of it for problems that are genuinely hard or genuinely unclear — not for "rename this file". <span class="word">grown-up word: extended thinking</span>`));
+  s.append(el("p","small",`It costs you waiting time and fills the backpack faster, so save it for problems that are genuinely hard or genuinely unclear — not for "rename this file". There is a switch for the thinking itself (<b>Option+T</b> on a Mac, <b>Alt+T</b> everywhere else), but on is the right setting for everyone reading this. <span class="word">grown-up word: extended thinking</span>`));
 }});
 add({ lv:6, kind:"idea", build: s => {
   s.append(el("h3",null,"Read the plan. Actually read it."));
@@ -1992,8 +1987,8 @@ add({ lv:10, kind:"recap", badge:10, build: s => {
   s.append(el("div","vis",`
     <div class="callouts">
       <div class="co"><span class="n">✓</span><span><b>A skill is a folder with a SKILL.md.</b> <span>Cheaper than the notebook, because it only loads when needed.</span></span></div>
-      <div class="co"><span class="n">✓</span><span><b>Three ways in, for now.</b> <span>A marketplace, a folder copied from the internet, or a file you wrote yourself. Two heavier ones are waiting in “Going further”, once you have finished.</span></span></div>
-      <div class="co"><span class="n">✓</span><span><b>A skill is reached for; a command is typed.</b> <span>And a card can be told which tools it may use at all.</span></div>
+      <div class="co"><span class="n">✓</span><span><b>Two ways to install one, and one you write.</b> <span>A marketplace, or a folder copied from the internet — plus the command file you wrote yourself. Two heavier installs are waiting in “Going further”, once you have finished.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>A skill is reached for; a command is typed.</b> <span>And a card can be told which tools it may use at all.</span></span></div>
       <div class="co"><span class="n">✓</span><span><b>Switching off matters as much as installing.</b> <span>Big toolbox, small number of tools carried.</span></span></div>
     </div>`));
 }});
@@ -2015,7 +2010,7 @@ add({ lv:11, kind:"idea", build: s => {
   s.append(el("h3",null,"Three worth hiring"));
   s.append(el("p","body-txt","You can invent any teammate you like, but almost everyone ends up with these three."));
   s.append(el("div","vis",VIS.crewThree()));
-  s.append(el("p","small",`Have a look at yours with <code class="ic">/agents</code>. Each one is a small file in <code class="ic">~/.claude/agents/</code> saying what it is for, which tools it may use, and which brain it should use — the same <code class="ic">allowed-tools</code> fencing you put on a card in Level 9, now applied to a whole teammate. A checker with no ability to edit is the one that matters.`));
+  s.append(el("p","small",`Have a look at yours with <code class="ic">/agents</code>. Each one is a small file in <code class="ic">~/.claude/agents/</code> saying what it is for, which tools it may use, and which brain it should use — the same fencing you put on a card in Level 9, now applied to a whole teammate. One thing to watch: a card spells it <code class="ic">allowed-tools</code>, a teammate spells it <code class="ic">tools</code>. Same idea, different word, and the wrong one is simply ignored. A checker with no ability to edit is the one that matters.`));
 }});
 
 add({ lv:11, kind:"idea", build: s => {
@@ -2223,7 +2218,7 @@ addMission({
    learner to trust and run a stranger's code, which is a decision worth
    making with the whole course behind you rather than in front of you. */
 add({ lv:20, kind:"idea", build: s => {
-  s.append(el("h3",null,"Way 3 — a skill that installs itself"));
+  s.append(el("h3",null,"A skill that installs itself"));
   s.append(el("p","body-txt","Bigger skills sometimes ship as a proper program that puts itself in the right place. This one turns any project into a map you can ask questions about."));
   s.append(cmdEl("In your terminal", "uv tool install graphifyy"));
   s.append(cmdEl("Then let it register itself", "graphify install"));
@@ -2231,7 +2226,7 @@ add({ lv:20, kind:"idea", build: s => {
 }});
 
 add({ lv:20, kind:"idea", build: s => {
-  s.append(el("h3",null,"Way 4 — the enormous one"));
+  s.append(el("h3",null,"The enormous one — somebody's whole setup"));
   s.append(el("p","body-txt","Some people share their whole setup: hundreds of skills, dozens of teammates, and rules for every programming language. This is what a fully-loaded robot looks like."));
   s.append(cmdEl("The easy way, inside Claude Code", "/plugin marketplace add https://github.com/affaan-m/ECC"));
   s.append(cmdEl("then", "/plugin install ecc@ecc"));
@@ -2461,7 +2456,11 @@ class Dugout {
 }
 
 /* ---------- state ---------- */
-const KEY = "cc-academy-deck-v1";
+/* Bumped to v2 when the deck grew from 132 to 138 slides. `solved` stores absolute
+ * slide indices, so inserting slides mid-deck silently shifts every saved index —
+ * a returning learner would be told to redo levels they finished while stale
+ * indices counted as solved. A new key throws that away instead of corrupting it. */
+const KEY = "cc-academy-deck-v2";
 let st = { i:0, badges:[], solved:[] };
 try {
   const r = localStorage.getItem(KEY);

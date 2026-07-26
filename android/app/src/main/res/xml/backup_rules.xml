@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Used on Android 11 and below (android:fullBackupContent).
+
+  The only thing worth backing up is the WebView's localStorage, which is where
+  the course keeps which slide you are on and which badges you have earned.
+  Losing that on a new phone means starting a 138-slide course again.
+
+  Nothing else is included, because nothing else exists — the app stores no
+  files, no accounts and no preferences of its own.
+-->
+<full-backup-content>
+    <include domain="database" path="webview.db" />
+    <include domain="file" path="app_webview/Local Storage/" />
+</full-backup-content>

@@ -1,0 +1,151 @@
+<!-- ============================================================
+     MOBILE ENHANCEMENT LAYER
+     Appended to the standalone course build by build-mobile.sh.
+
+     index.html is NEVER edited for mobile. The deck is already
+     responsive (clamp() type, a scrolling tab strip, a 700px
+     breakpoint), so this layer only adds the things a phone has
+     that a desktop browser does not: a notch, a soft keyboard,
+     fingers instead of arrow keys, and pull-to-refresh.
+
+     Everything here is additive. Delete this block and you are
+     back to the exact desktop build.
+     ============================================================ -->
+<style id="mobile-enhance">
+  /* The desktop build scales the whole page to 1.1 so nothing feels cramped on
+     a large monitor. On a 390px-wide phone that same number is what MAKES it
+     cramped, so hand the width back on small screens. */
+  @media (max-width: 820px) {
+    :root { zoom: 1; }
+  }
+
+  /* Notch, punch-hole and home indicator. The document is drawn edge-to-edge
+     (viewport-fit=cover) so the app's own chrome must keep clear of them. */
+  .rail  { padding-top: env(safe-area-inset-top, 0px); }
+  .stage { padding-left: max(20px, env(safe-area-inset-left, 0px));
+           padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+  .nav   { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+  body {
+    /* Kill pull-to-refresh: in a slide deck the top of the page is reachable
+       constantly, and reloading mid-lesson looks like a crash to a beginner. */
+    overscroll-behavior-y: contain;
+    /* No grey flash box on every tap. */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Nothing may scroll the page sideways — a horizontal drag is a slide gesture. */
+  html, body { overflow-x: hidden; }
+
+  /* Touch targets. 44pt is Apple's HIG minimum, 48dp is Android's; 46px with
+     the padding below clears both once the border box is counted. */
+  @media (pointer: coarse) {
+    .tab      { min-height: 46px; padding-top: 9px; padding-bottom: 9px; }
+    .btn      { min-height: 46px; }
+    .sheet li a, .sheet li button { min-height: 44px; display: flex; align-items: center; }
+  }
+
+  /* The practice terminal is the one place a soft keyboard appears. Give it
+     room to breathe above the keyboard rather than being pinned under it. */
+  @media (pointer: coarse) {
+    .dugout { scroll-margin-bottom: 40vh; }
+  }
+
+  /* A horizontal swipe should feel like it moved the slide, not smeared the
+     text selection across it. */
+  @media (pointer: coarse) {
+    .slide h2, .slide h3 { -webkit-user-select: none; user-select: none; }
+  }
+
+  /* The terminal mocks and code blocks are laid out for a desktop column and
+     are wider than a phone. On the desktop build the surplus simply is not
+     there; here the line was being cut off mid-word with no way to see the
+     rest — "I'll create index.html with a pho" and nothing after it.
+
+     Let them scroll sideways on their own instead. The swipe handler already
+     treats .mock, pre, code and table as off-limits, so dragging inside one
+     scrolls the block and never skips a slide. */
+  .mock, .term, .dugout, pre, table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  /* A thin, dark scrollbar so it is discoverable without being ugly — most
+     touch browsers hide it until the block is actually scrolled. */
+  .mock::-webkit-scrollbar, .term::-webkit-scrollbar, pre::-webkit-scrollbar {
+    height: 4px;
+  }
+  .mock::-webkit-scrollbar-thumb, .term::-webkit-scrollbar-thumb,
+  pre::-webkit-scrollbar-thumb {
+    background: var(--line); border-radius: 2px;
+  }
+</style>
+
+<script id="mobile-enhance-js">
+(() => {
+  "use strict";
+
+  /* The deck declares `go`, `st` and `S` as top-level const/let. They live in
+     the global lexical scope rather than on `window`, which means a later
+     inline script can reach them by name — but only if the deck actually
+     parsed. If it threw, fail quiet rather than stacking a second error on
+     top of a course that is already broken. */
+  const nav = (delta) => {
+    try { go(st.i + delta); } catch (_) { /* deck not ready */ }
+  };
+
+  /* ---- swipe to change slide ------------------------------------------- */
+
+  /* Anything that scrolls sideways, takes typing, or is a control of its own
+     owns its horizontal gestures. Swiping the tab strip must scroll the tab
+     strip, not skip three lessons. */
+  const GUARD = ".tabs, .dugout, .sheet, .scrim, input, textarea, button, a, pre, code, table, .mock";
+
+  const SWIPE_MIN   = 55;  /* px of horizontal travel before it counts       */
+  const SLOP_MAX    = 45;  /* px of vertical drift allowed — above this the
+                              finger was scrolling, not swiping              */
+  const TIME_MAX    = 700; /* ms — a slow drag is a scroll or a selection    */
+
+  let x0 = 0, y0 = 0, t0 = 0, live = false;
+
+  document.addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1) { live = false; return; }   /* pinch-zoom */
+    const t = e.touches[0];
+    if (t.target.closest && t.target.closest(GUARD)) { live = false; return; }
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); live = true;
+  }, { passive: true });
+
+  document.addEventListener("touchend", (e) => {
+    if (!live) return;
+    live = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - x0;
+    const dy = t.clientY - y0;
+    if (Date.now() - t0 > TIME_MAX)      return;
+    if (Math.abs(dy) > SLOP_MAX)         return;
+    if (Math.abs(dx) < SWIPE_MIN)        return;
+    nav(dx < 0 ? 1 : -1);                /* drag left = go forward */
+  }, { passive: true });
+
+  /* ---- gesture back (iOS) ---------------------------------------------- */
+
+  /* This is for iOS, where allowsBackForwardNavigationGestures drives the
+     edge-swipe off the WebView's own history. The deck redraws in place and
+     creates no history of its own, so one entry is seeded here and re-seeded
+     after each pop — enough for the gesture to always have something to pop,
+     with popstate translating it into "previous slide".
+
+     Android deliberately does NOT rely on this. One seeded entry is consumed
+     by the first press, after which back closed the app mid-course; there,
+     MainActivity.onBackPressed asks the deck for st.i directly. Keeping the
+     seed here costs nothing on Android and is what iOS needs. */
+  const seedHistory = () => {
+    try { history.pushState({ deck: true }, ""); } catch (_) {}
+  };
+  window.addEventListener("popstate", () => {
+    nav(-1);
+    seedHistory();
+  });
+  seedHistory();
+})();
+</script>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  No <uses-permission> lines, deliberately — not even INTERNET.
+
+  The course is one self-contained HTML file inside the APK with no external
+  requests, so the app has nothing to ask the reader for. It also means the
+  Play Console Data Safety declaration is "no data collected, no data shared"
+  and is provably true rather than a promise.
+
+  The package name is NOT declared here. AGP 8 takes it from `namespace` in
+  build.gradle.kts and rejects a package= attribute outright; the toolchain-only
+  build script injects it into a throwaway copy of this file instead.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Phones and tablets, not Wear/TV/Auto. Keeps the store listing honest. -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:hardwareAccelerated="true"
+        android:theme="@style/Theme.Academy">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.Academy"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="fullUser"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode|smallestScreenSize|density|navigation|fontScale">
+            <!--
+              enableOnBackInvokedCallback is left OFF on purpose. Opting in to
+              predictive back on API 33+ stops onBackPressed() being called, and
+              onBackPressed() is what walks the reader back a slide instead of
+              closing the course. Revisit only alongside an OnBackInvokedCallback.
+
+              configChanges is broad so a rotation does not recreate the WebView:
+              recreating it reloads the deck and loses the reader's place mid-lesson.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

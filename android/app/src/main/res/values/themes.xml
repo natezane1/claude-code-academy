@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      The course is dark by design, not by system preference — the same decision
+      the CSS makes (dark is :root, light is an opt-in data-theme). So there is
+      one theme and values-night matches it: switching the phone to light mode
+      should not half-convert a deck that has no light half.
+
+      Material rather than AppCompat/Material3 because this app has no AndroidX
+      dependency at all. That is what lets it build from the SDK alone.
+    -->
+    <style name="Theme.Academy" parent="@android:style/Theme.Material.NoActionBar">
+        <!-- Painted before the WebView draws, so launch is a dark window that
+             becomes the course, not a white flash that becomes the course. -->
+        <item name="android:windowBackground">@color/paper</item>
+        <item name="android:colorPrimary">@color/paper</item>
+        <item name="android:colorAccent">@color/accent</item>
+
+        <!-- Edge-to-edge. Insets are applied natively in MainActivity. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
+        <!-- Light icons on the dark bars. -->
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Let the deck use the full screen on notched devices; the native
+             inset listener keeps the chrome clear of the cutout. Ignored below
+             API 28, which is the correct behaviour there. -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>
