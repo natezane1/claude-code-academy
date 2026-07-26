@@ -1088,7 +1088,12 @@ const LV = [
   "Act I recap · First day in the dugout",
   "Act II recap · Build it right",
   "Act III recap · Off the leash",
-  "Act IV recap · Build the bench"
+  "Act IV recap · Build the bench",
+  /* Post-capstone. Not a level: no badge, nothing depends on it, and nothing
+     later depends on anything in it. It exists so the two heaviest installs
+     are available to someone who has finished and wants more, instead of
+     sitting in Level 9 in front of someone who has not. */
+  "Going further · once you have finished"
 ];
 const BADGES = [
   { lv:1, name:"Met the robot" },
@@ -1223,12 +1228,6 @@ add({ lv:2, kind:"idea", build: s => {
 }});
 
 add({ lv:2, kind:"idea", build: s => {
-  s.append(el("h3",null,"Three steps, and that is the whole install"));
-  s.append(el("div","vis",VIS.installFlow()));
-  s.append(el("p","small","The next three slides do one step each."));
-}});
-
-add({ lv:2, kind:"idea", build: s => {
   s.append(el("h3",null,"Wait — where is the terminal?"));
   s.append(el("p","body-txt","Every step from here starts in the terminal, so find it once and you are set. It is already on your computer. You do not install it."));
   s.append(el("div","vis",`
@@ -1238,6 +1237,12 @@ add({ lv:2, kind:"idea", build: s => {
       <div class="co"><span class="n">Lin</span><span><b>Press Ctrl, Alt and T together</b> <span>or search for <code class="ic">terminal</code>.</span></span></div>
     </div>`));
   s.append(el("p","small","A window of plain text opens. That is it. That is the dugout you will be working in for the rest of this course."));
+}});
+
+add({ lv:2, kind:"idea", build: s => {
+  s.append(el("h3",null,"Three steps, and that is the whole install"));
+  s.append(el("div","vis",VIS.installFlow()));
+  s.append(el("p","small","The next three slides do one step each."));
 }});
 
 add({ lv:2, kind:"idea", build: s => {
@@ -1884,23 +1889,7 @@ add({ lv:10, kind:"idea", build: s => {
   s.append(el("p","body-txt","Most skills are simpler than that: someone put a folder on GitHub, and you copy it into your skills folder. This one gives you a council of five advisers who argue about your decisions."));
   s.append(cmdEl("In your terminal (not inside Claude Code)", "git clone https://github.com/tenfoldmarc/llm-council-skill ~/.claude/skills/llm-council"));
   s.append(el("p","body-txt",`Restart Claude Code and say "council this: should I…". That is the entire installation.`));
-}});
-
-add({ lv:10, kind:"idea", build: s => {
-  s.append(el("h3",null,"Way 3 — a skill that installs itself"));
-  s.append(el("p","body-txt","Bigger skills sometimes ship as a proper program that puts itself in the right place. This one turns any project into a map you can ask questions about."));
-  s.append(cmdEl("In your terminal", "uv tool install graphifyy"));
-  s.append(cmdEl("Then let it register itself", "graphify install"));
-  s.append(el("div","alarm",`<span class="eyebrow">Read the spelling twice</span><p>The package is <code class="ic">graphifyy</code> with two y's. Other similarly-named ones on the internet are not the same thing. This is a genuinely good habit: check the exact name before installing anything.</p>`));
-}});
-
-add({ lv:10, kind:"idea", build: s => {
-  s.append(el("h3",null,"Way 4 — the enormous one"));
-  s.append(el("p","body-txt","Some people share their whole setup: hundreds of skills, dozens of teammates, and rules for every programming language. This is what a fully-loaded robot looks like."));
-  s.append(cmdEl("The easy way, inside Claude Code", "/plugin marketplace add https://github.com/affaan-m/ECC"));
-  s.append(cmdEl("then", "/plugin install ecc@ecc"));
-  s.append(el("p","small","There is also a manual way — clone the repository and run its own installer — but pick one method and stick to it. Its instructions specifically warn against mixing the two."));
-  s.append(el("div","note",`<span class="eyebrow">Do not do this one yet</span><p>Installing hundreds of skills before you have needed a single one is how people end up confused. Come back to this when something you do often feels repetitive.</p>`));
+  s.append(el("p","small",`That word <code class="ic">git clone</code> just means "copy this folder from the internet", and <code class="ic">~/.claude/</code> is the robot's own folder inside your home folder. Two heavier ways to install exist — a program that installs itself, and someone's entire setup at once. Both are waiting in <b>Going further</b>, at the very end. They are there on purpose: each one runs a stranger's code on your computer, and that is a decision worth making with the whole course behind you.`));
 }});
 
 add({ lv:10, kind:"idea", build: s => {
@@ -1935,7 +1924,7 @@ add({ lv:10, kind:"recap", badge:10, build: s => {
   s.append(el("div","vis",`
     <div class="callouts">
       <div class="co"><span class="n">✓</span><span><b>A skill is a folder with a SKILL.md.</b> <span>Cheaper than the notebook, because it only loads when needed.</span></span></div>
-      <div class="co"><span class="n">✓</span><span><b>Four ways in.</b> <span>A marketplace, a git clone, a self-installing program, or a whole shared setup.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>Two ways in, for now.</b> <span>A marketplace, or a folder copied from the internet. Two heavier ones are waiting in “Going further”, once you have finished.</span></span></div>
       <div class="co"><span class="n">✓</span><span><b>Switching off matters as much as installing.</b> <span>Big toolbox, small number of tools carried.</span></span></div>
     </div>`));
 }});
@@ -2160,6 +2149,27 @@ addMission({
 });
 
 /* ---- close ---- */
+/* ============ GOING FURTHER — after the capstone ============
+   Two installs that were in Level 9. They are here because they ask the
+   learner to trust and run a stranger's code, which is a decision worth
+   making with the whole course behind you rather than in front of you. */
+add({ lv:20, kind:"idea", build: s => {
+  s.append(el("h3",null,"Way 3 — a skill that installs itself"));
+  s.append(el("p","body-txt","Bigger skills sometimes ship as a proper program that puts itself in the right place. This one turns any project into a map you can ask questions about."));
+  s.append(cmdEl("In your terminal", "uv tool install graphifyy"));
+  s.append(cmdEl("Then let it register itself", "graphify install"));
+  s.append(el("div","alarm",`<span class="eyebrow">Read the spelling twice</span><p>The package is <code class="ic">graphifyy</code> with two y's. Other similarly-named ones on the internet are not the same thing. This is a genuinely good habit: check the exact name before installing anything.</p>`));
+}});
+
+add({ lv:20, kind:"idea", build: s => {
+  s.append(el("h3",null,"Way 4 — the enormous one"));
+  s.append(el("p","body-txt","Some people share their whole setup: hundreds of skills, dozens of teammates, and rules for every programming language. This is what a fully-loaded robot looks like."));
+  s.append(cmdEl("The easy way, inside Claude Code", "/plugin marketplace add https://github.com/affaan-m/ECC"));
+  s.append(cmdEl("then", "/plugin install ecc@ecc"));
+  s.append(el("p","small","There is also a manual way — clone the repository and run its own installer — but pick one method and stick to it. Its instructions specifically warn against mixing the two."));
+  s.append(el("div","note",`<span class="eyebrow">Still the last thing you should do</span><p>Installing hundreds of skills before you have needed a single one is how people end up confused — even now. Do this when something you do often feels repetitive, not because the list looks impressive.</p>`));
+}});
+
 add({ lv:15, kind:"end", build: s => {
   s.append(el("div","cover",`${VIS.robot()}<h2>That is the <span class="em">whole course</span></h2>`));
   s.append(el("p","lede","Fourteen levels, from never having opened a terminal to building a loop that runs without you."));
@@ -2482,6 +2492,7 @@ const TAB_ORDER = [
   { lv:10, label:"9" }, { lv:11, label:"10" }, { lv:12, label:"11" },
   { lv:13, label:"12" }, { lv:14, label:"13" },
   { lv:19, label:"Recap", rc:true },
+  { lv:20, label:"+", name:"Going further" },
   { lv:15, label:"★", name:"What's next" }
 ];
 
