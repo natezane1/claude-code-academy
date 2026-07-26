@@ -1832,6 +1832,28 @@ add({ lv:9, kind:"idea", build: s => {
   s.append(el("div","alarm",`<span class="eyebrow">Do not build this one alone</span><p>A routine runs with nobody watching, and connecting it to real email or messages means real messages get sent. Everything in Level 3 applies double here. Set your first one up with a grown-up, and start with something that only ever <i>reads</i> and reports.</p>`));
 }});
 
+add({ lv:9, kind:"idea", build: s => {
+  s.append(el("h3",null,"Take the dugout with you"));
+  s.append(el("p","body-txt","A scheduled job runs on Claude's side, so it does not care where you are. A loop you started yourself is different: it is running on <i>your</i> computer, and until now that meant sitting next to it."));
+  s.append(el("p","body-txt",`It does not. Type <code class="ic">/remote-control</code> in a session that is already running and you get a link and a square barcode. Open the link in any browser, or point your phone's camera at the barcode, and the same conversation appears there.`));
+  s.append(cmdEl("in a session you already have open", "/remote-control"));
+  s.append(el("p","body-txt",`No app yet? Type <code class="ic">/mobile</code> and it shows you a barcode to install one.`));
+  s.append(el("div","note",`<span class="eyebrow">What is actually happening</span><p>Your phone is a window, not a second robot. The work still happens on the computer on your desk, using your files and your folders. Nothing is copied anywhere to make this work, and your computer never opens a door for anyone to come in — it only makes calls out.</p>`));
+  s.append(el("p","small","It needs the same paid plan you already have, and it is new enough to still be settling down, so expect small changes."));
+}});
+add({ lv:9, kind:"idea", build: s => {
+  s.append(el("h3",null,"The catch, and the payoff"));
+  s.append(el("div","alarm",`<span class="eyebrow">The catch — this is the one that catches everybody</span><p>The robot is still on your computer, so your computer has to stay awake and that terminal window has to stay open. Close the lid, close the window, and the session ends. This is the opposite of the scheduled job on the last slide, which runs perfectly well while your laptop is shut.</p>`));
+  s.append(el("p","body-txt","The payoff is the red light. All through Level 3 the robot has been stopping to ask permission — and until now that meant it sat there waiting until you came back to your desk."));
+  s.append(el("p","body-txt","Now it can tap you on the shoulder instead. Set it up once:"));
+  s.append(el("div","vis",`
+    <div class="callouts">
+      <div class="co"><span class="n">1</span><span><b>Install the Claude app and sign in.</b> <span>The same account you used in Level 1.</span></span></div>
+      <div class="co"><span class="n">2</span><span><b>Say yes when it asks about notifications.</b> <span>Your phone will ask, not the robot.</span></span></div>
+      <div class="co"><span class="n">3</span><span><b>Turn them on in the dugout.</b> <span>Type <code class="ic">/config</code> — the settings menu — and switch on <i>push when actions required</i>.</span></span></div>
+    </div>`));
+  s.append(el("p","small","Now a loop can run while you make a cup of tea, and the moment it needs a yes or no, your phone asks you for one. That is the whole feature: you are still the coach, you are just not chained to the bench."));
+}});
 add({ lv:9, kind:"practice", challenge:{
   goal:"Write a goal with all three ingredients. Include the words “until” (the finish line) and “stop after” (the guardrail).",
   accept:[/until[\s\S]*stop after/i],
@@ -1850,6 +1872,7 @@ add({ lv:9, kind:"recap", badge:9, build: s => {
       <div class="co"><span class="n">✓</span><span><b>Maker plus checker.</b> <span>A second robot reviews, because it has no pride in the work.</span></span></div>
       <div class="co"><span class="n">✓</span><span><b>Finish line, proof, guardrail.</b> <span>All three, or it never stops properly.</span></span></div>
       <div class="co"><span class="n">✓</span><span><b>Defining “done” is the hard bit.</b> <span>And it is a thinking skill, not a typing one.</span></span></div>
+      <div class="co"><span class="n">✓</span><span><b>You do not have to sit there.</b> <span>Schedules run without you; <code class="ic">/remote-control</code> puts the running session on your phone.</span></span></div>
     </div>`));
 }});
 
