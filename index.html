@@ -672,12 +672,12 @@ const VIS = {
       <div class="pack">
         <div class="top"><b>Getting heavy</b><span>50–75%</span></div>
         <div class="meter mid"><i style="width:66%"></i></div>
-        <div class="cap">Still fine, but tidy up soon — squash the chat with <code class="ic">/compact</code> or start a fresh one.</div>
+        <div class="cap">Still fine, but tidy up soon — squash the chat with <code class="ic">/compact</code>.</div>
       </div>
       <div class="pack">
         <div class="top"><b>Too full</b><span>75%+</span></div>
         <div class="meter bad"><i style="width:88%"></i></div>
-        <div class="cap">It starts forgetting the beginning and cutting corners to finish. Start a new conversation instead of pushing on.</div>
+        <div class="cap">It starts forgetting the beginning and cutting corners to finish. Pushing on from here is how good sessions go bad.</div>
       </div>
     </div>`,
 
@@ -729,7 +729,10 @@ const VIS = {
     <div class="mock">
       <div class="mock-body">
         <p class="l fa">To do that I need to create <span class="am">hello.txt</span>.</p>
-        <p class="l am">May I? [y / n]</p>
+        <p class="l am">May I?</p>
+        <p class="l">  1. Yes</p>
+        <p class="l">  2. No — tell it what to do instead</p>
+        <p class="l">  3. Yes, and stop asking about this</p>
       </div>
     </div>`,
 
@@ -1578,10 +1581,9 @@ add({ lv:6, kind:"idea", build: s => {
 }});
 
 add({ lv:6, kind:"idea", build: s => {
-  s.append(el("h3",null,"Read the offer before you accept it"));
-  s.append(el("p","body-txt","When it hands you a plan you get more than yes and no. One of the choices is “go ahead, and stop asking me about the edits” — which quietly walks you off the red light and onto the green one."));
-  s.append(el("div","alarm",`<span class="eyebrow">Worth knowing before you click it</span><p>That option is not wrong. But it is a different light, chosen in a hurry, at the exact moment you are keenest to see the thing built. Pick it on purpose or not at all.</p>`));
-  s.append(el("p","body-txt","And a plan is not a contract. Agreeing to it makes it likely, not certain — so check what it built against what it promised, the same as always."));
+  s.append(el("h3",null,"A plan is not a contract"));
+  s.append(el("p","body-txt","Agreeing to a plan makes it likely, not certain. The robot can still drift, run long, or quietly do the next helpful thing it thinks of. So when it says it has finished, check what it built against what it promised — the same as always."));
+  s.append(el("div","alarm",`<span class="eyebrow">And one thing to notice as you accept</span><p>Approving a plan offers you the same third option you met on the traffic lights in Level 3 — go ahead <i>and stop asking</i>. It is offered at the exact moment you are keenest to see the thing built, which is the worst moment to change how much freedom the robot has. Pick it on purpose or not at all.</p>`));
 }});
 
 add({ lv:6, kind:"idea", build: s => {
