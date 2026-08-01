@@ -50,3 +50,4 @@ ios/DerivedData/
 ios/*.xcworkspace/xcuserdata/
 ios/**/xcuserdata/
 ios/**/*.xcuserstate
+dist/
