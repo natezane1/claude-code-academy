@@ -20,7 +20,7 @@
 
 set -euo pipefail
 
-SRC_DIR="$HOME/claude-code-course"
+SRC_DIR="${SRC_DIR:-$HOME/claude-code-course}"
 SRC="$SRC_DIR/index.html"
 APP_NAME="Claude Code Academy"
 # The launcher target deliberately has NO spaces in its path: a .desktop Exec

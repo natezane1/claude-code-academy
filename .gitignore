@@ -51,3 +51,12 @@ ios/*.xcworkspace/xcuserdata/
 ios/**/xcuserdata/
 ios/**/*.xcuserstate
 dist/
+
+# ------------------------------------------------------------- Chromebook
+#   bash chromeos/build-chromebook.sh -> chromeos/*.html, docs/
+# The file build is a generated copy of the course, so it is not tracked.
+chromeos/Claude Code Academy (Chromebook).html
+
+# docs/ IS tracked, and is the one deliberate exception to the rule above:
+# GitHub Pages serves what is committed, so an untracked docs/ is a site that
+# does not exist. Re-run the build and commit docs/ after editing index.html.
