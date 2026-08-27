@@ -1,7 +1,7 @@
 /* Claude Code Academy — offline service worker.
  *
  * Generated into docs/ by chromeos/build-chromebook.sh, which substitutes
- * 836602652537 with a hash of the built course. A new course build is
+ * 9ced5a744632 with a hash of the built course. A new course build is
  * therefore a new cache name, which is what evicts the old one.
  *
  * The whole "app" is four files and no API, so the strategy is the simple
@@ -10,7 +10,7 @@
  */
 "use strict";
 
-const CACHE = "cca-836602652537";
+const CACHE = "cca-9ced5a744632";
 
 /* Relative to the service worker's own scope, so this works whether the site
    is served from a domain root or from a /repo-name/ project page. */
