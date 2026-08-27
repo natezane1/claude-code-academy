@@ -28,6 +28,13 @@
     :root { zoom: 1; }
   }
 
+  /* And on anything phone-width, whatever its height. A tall phone (412x915)
+     cleared the height rule above and was still being scaled to 1.1, which on
+     a 412px-wide screen is what MAKES it cramped. */
+  @media (max-width: 820px) {
+    :root { zoom: 1; }
+  }
+
   /* ---- 2. the hinge -----------------------------------------------------
      Folded into a tablet the trackpad is gone, so every control has to be
      hittable with a thumb. 48dp is the Android/ChromeOS target minimum. */
@@ -40,6 +47,14 @@
        selection across the headings on its way. */
     .slide h2, .slide h3 { -webkit-user-select: none; user-select: none; }
   }
+
+  /* Installed, the page owns the whole screen and there is no browser chrome
+     keeping it clear of a notch or a home indicator. In a tab these insets
+     are 0, so the rule costs nothing there. */
+  .rail  { padding-top: env(safe-area-inset-top, 0px); }
+  .stage { padding-left: max(20px, env(safe-area-inset-left, 0px));
+           padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+  .nav   { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
   body {
     /* Kill pull-to-refresh. In tablet mode the top of the deck is reachable
@@ -116,29 +131,48 @@
      strip, not skip three lessons. */
   const GUARD = ".tabs, .dugout, .sheet, .scrim, input, textarea, button, a, pre, code, table, .mock";
 
-  const SWIPE_MIN = 55;  /* px of horizontal travel before it counts        */
-  const SLOP_MAX  = 45;  /* px of vertical drift allowed — above this the
-                            finger was scrolling, not swiping               */
-  const TIME_MAX  = 700; /* ms — a slow drag is a scroll or a selection     */
+  const SWIPE_MIN  = 70;  /* px of horizontal travel before it counts       */
+  const RATIO_MIN  = 2.2; /* how many times more sideways than up-and-down a
+                             drag must be before it is called a swipe        */
+  const AXIS_LOCK  = 10;  /* px of travel after which the direction is decided */
+  const TIME_MAX   = 700; /* ms — a slow drag is a scroll or a selection      */
 
-  let x0 = 0, y0 = 0, t0 = 0, live = false;
+  let x0 = 0, y0 = 0, t0 = 0, live = false, axis = null;
 
   document.addEventListener("touchstart", (e) => {
     if (e.touches.length !== 1) { live = false; return; }   /* pinch-zoom */
     const t = e.touches[0];
     if (t.target.closest && t.target.closest(GUARD)) { live = false; return; }
-    x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); live = true;
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); live = true; axis = null;
+  }, { passive: true });
+
+  /* Lock to an axis on the first real movement, the way a native carousel
+     does. A slop budget alone is not enough: a thumb scrolling a phone
+     travels in an arc, so a perfectly ordinary "scroll down a bit" arrives
+     as 60px across and 40px down and was being read as a swipe. Once this
+     gesture is going up or down it is a scroll, and it stays a scroll. */
+  document.addEventListener("touchmove", (e) => {
+    if (!live || axis || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = Math.abs(t.clientX - x0);
+    const dy = Math.abs(t.clientY - y0);
+    if (dx < AXIS_LOCK && dy < AXIS_LOCK) return;   /* too early to tell */
+    axis = dx > dy ? "x" : "y";
+    if (axis === "y") live = false;                 /* hands off — it scrolls */
   }, { passive: true });
 
   document.addEventListener("touchend", (e) => {
     if (!live) return;
     live = false;
+    if (axis !== "x") return;
     const t = e.changedTouches[0];
     const dx = t.clientX - x0;
     const dy = t.clientY - y0;
-    if (Date.now() - t0 > TIME_MAX) return;
-    if (Math.abs(dy) > SLOP_MAX)    return;
-    if (Math.abs(dx) < SWIPE_MIN)   return;
+    if (Date.now() - t0 > TIME_MAX)                  return;
+    if (Math.abs(dx) < SWIPE_MIN)                    return;
+    /* Second guard, because the axis lock only compares the first 10px: the
+       whole gesture has to be decisively sideways, not merely more sideways. */
+    if (Math.abs(dx) < Math.abs(dy) * RATIO_MIN)     return;
     nav(dx < 0 ? 1 : -1);           /* drag left = go forward */
   }, { passive: true });
 
