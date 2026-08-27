@@ -1,0 +1,203 @@
+<!-- ============================================================
+     CHROMEBOOK ENHANCEMENT LAYER
+     Appended to the standalone course build by
+     chromeos/build-chromebook.sh.
+
+     index.html is NEVER edited for ChromeOS. A Chromebook already
+     runs the desktop build correctly — this layer only adds the
+     four things a Chromebook has that a desktop browser does not:
+
+       1. a short screen (1366x768 is still the common panel)
+       2. a hinge, so the same machine is also a touch tablet
+       3. an "Install" affordance, because on ChromeOS the app
+          IS the installed web app — there is no .exe to ship
+       4. no guaranteed network, so the installed copy has to
+          keep working on a school bus
+
+     Everything here is additive. Delete this block and you are
+     back to the exact desktop build.
+     ============================================================ -->
+<style id="chromeos-enhance">
+  /* ---- 1. the short screen ---------------------------------------------
+     The desktop build scales the page to 1.1 so nothing feels small on a
+     27" monitor. A slide is height-constrained, not width-constrained, and
+     768px of panel minus the shelf and the tab strip leaves roughly 660px
+     of stage. At 1.1 that becomes 600 CSS px and the nav bar starts pushing
+     the slide body off the bottom. Hand the height back on short screens. */
+  @media (max-height: 850px) {
+    :root { zoom: 1; }
+  }
+
+  /* ---- 2. the hinge -----------------------------------------------------
+     Folded into a tablet the trackpad is gone, so every control has to be
+     hittable with a thumb. 48dp is the Android/ChromeOS target minimum. */
+  @media (pointer: coarse) {
+    .tab { min-height: 48px; padding-top: 10px; padding-bottom: 10px; }
+    .btn { min-height: 48px; }
+    .sheet li a, .sheet li button { min-height: 48px; display: flex; align-items: center; }
+
+    /* A horizontal drag is a slide gesture, so it must not smear a text
+       selection across the headings on its way. */
+    .slide h2, .slide h3 { -webkit-user-select: none; user-select: none; }
+  }
+
+  body {
+    /* Kill pull-to-refresh. In tablet mode the top of the deck is reachable
+       constantly, and a reload mid-lesson reads as a crash to a beginner. */
+    overscroll-behavior-y: contain;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Nothing may scroll the page sideways — a horizontal drag is a slide. */
+  html, body { overflow-x: hidden; }
+
+  /* Terminal mocks and code blocks are laid out for a wide desktop column.
+     On an 11" panel they were being cut off mid-word with no way to reach
+     the rest. Let them scroll sideways on their own; the swipe handler
+     below treats them as off-limits, so dragging inside one scrolls the
+     block instead of skipping a lesson. */
+  .mock, .term, .dugout, pre, table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  .mock::-webkit-scrollbar, .term::-webkit-scrollbar, pre::-webkit-scrollbar { height: 4px; }
+  .mock::-webkit-scrollbar-thumb, .term::-webkit-scrollbar-thumb,
+  pre::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+
+  /* ---- 3. the install button -------------------------------------------
+     Hidden until Chrome tells us the page is actually installable, so it
+     can never sit there promising something that will not happen. */
+  #cca-install {
+    position: fixed;
+    right: max(14px, env(safe-area-inset-right, 0px));
+    bottom: max(14px, env(safe-area-inset-bottom, 0px));
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid #e8b23a;
+    border-radius: 999px;
+    background: #131a17;
+    color: #e8b23a;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, .45);
+  }
+  #cca-install:hover { background: #1b2420; }
+  #cca-install[hidden] { display: none !important; }
+  @media print { #cca-install { display: none !important; } }
+</style>
+
+<button id="cca-install" type="button" aria-label="Install Claude Code Academy as an app">
+  &#x2B07;&#xFE0F; Install as an app
+</button>
+
+<script id="chromeos-enhance-js">
+(() => {
+  "use strict";
+
+  /* The deck declares `go` and `st` as top-level const/let. They live in the
+     global lexical scope rather than on `window`, so a later inline script can
+     reach them by name — but only if the deck actually parsed. If it threw,
+     fail quiet rather than stacking a second error on a broken course. */
+  const nav = (delta) => {
+    try { go(st.i + delta); } catch (_) { /* deck not ready */ }
+  };
+
+  /* ---- swipe to change slide (tablet mode) ------------------------------ */
+
+  /* Anything that scrolls sideways, takes typing, or is a control of its own
+     owns its horizontal gestures. Swiping the tab strip must scroll the tab
+     strip, not skip three lessons. */
+  const GUARD = ".tabs, .dugout, .sheet, .scrim, input, textarea, button, a, pre, code, table, .mock";
+
+  const SWIPE_MIN = 55;  /* px of horizontal travel before it counts        */
+  const SLOP_MAX  = 45;  /* px of vertical drift allowed — above this the
+                            finger was scrolling, not swiping               */
+  const TIME_MAX  = 700; /* ms — a slow drag is a scroll or a selection     */
+
+  let x0 = 0, y0 = 0, t0 = 0, live = false;
+
+  document.addEventListener("touchstart", (e) => {
+    if (e.touches.length !== 1) { live = false; return; }   /* pinch-zoom */
+    const t = e.touches[0];
+    if (t.target.closest && t.target.closest(GUARD)) { live = false; return; }
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); live = true;
+  }, { passive: true });
+
+  document.addEventListener("touchend", (e) => {
+    if (!live) return;
+    live = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - x0;
+    const dy = t.clientY - y0;
+    if (Date.now() - t0 > TIME_MAX) return;
+    if (Math.abs(dy) > SLOP_MAX)    return;
+    if (Math.abs(dx) < SWIPE_MIN)   return;
+    nav(dx < 0 ? 1 : -1);           /* drag left = go forward */
+  }, { passive: true });
+
+  /* Deliberately NO history seeding here. The phone apps push a history entry
+     so an edge-swipe has something to pop; on ChromeOS this runs in a real
+     browser tab, where hijacking Back would trap the student on the page. */
+
+  /* ---- install as an app ------------------------------------------------ */
+
+  /* Two different builds run this same file:
+       - the single .html opened from the Files app (file://) — already
+         offline, nothing to install, so both blocks below no-op;
+       - the hosted copy (https://) — installable, and worth caching.
+     Feature detection rather than a build-time flag keeps it one file. */
+
+  const btn = document.getElementById("cca-install");
+  let prompt = null;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    /* Chrome fires this only when the page genuinely qualifies. Stop the
+       default mini-infobar so the button below is the single affordance. */
+    e.preventDefault();
+    prompt = e;
+    if (btn) btn.style.display = "inline-flex";
+  });
+
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      if (!prompt) return;
+      btn.style.display = "none";
+      const deferred = prompt;
+      prompt = null;                 /* a prompt may only be used once */
+      try {
+        await deferred.prompt();
+      } catch (_) {
+        /* Dismissed, or already installed in another window. Either way the
+           button has done its job and should not come back nagging. */
+      }
+    });
+  }
+
+  window.addEventListener("appinstalled", () => {
+    prompt = null;
+    if (btn) btn.style.display = "none";
+  });
+
+  /* ---- keep working offline --------------------------------------------- */
+
+  /* Service workers need a secure context. isSecureContext rather than a
+     protocol check on purpose: it is true for https AND for http://localhost,
+     so previewing the site locally behaves like the deployed one. file:// is
+     excluded by hand — Chrome counts it as secure, but a worker cannot be
+     registered from it, and that build is a single local file with nothing
+     to fetch anyway. Registration failure is never fatal: worst case the
+     student needs a connection, which is where they already were. */
+  if ("serviceWorker" in navigator && window.isSecureContext && location.protocol !== "file:") {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => { /* offline later, online now */ });
+    });
+  }
+})();
+</script>
